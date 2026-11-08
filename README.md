@@ -29,7 +29,8 @@ python3 -m http.server 8000
 - **Sortable columns** — click Item Name, Price or Score & Rating to toggle ascending / descending.
 - **Read-only user view** — menu items are frozen; no inline status editing, duplication, or modification controls.
 - **Single continuous list** — all matching items are shown together without pagination.
-- **Details drawer** — slides in from the right with item meta, status, rating, and description.
+- **Details drawer** — slides in from the right and shows **only the price** in a large
+  milk‑and‑coffee card (all other item meta was intentionally removed).
 - **Empty state**, **toasts**, reduced-motion support, and keyboard/Escape handling.
 - **Milk & light-coffee palette** — warm cream surfaces, latte-brown accents and golden rating stars.
 - **Responsive** — rows collapse into stacked cards below 900px.

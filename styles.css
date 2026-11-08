@@ -400,11 +400,6 @@ a { color: inherit; text-decoration: none; }
   text-overflow: ellipsis;
 }
 
-.rating--lg { gap: 11px; }
-.rating--lg .rating__score { font-size: 22px; letter-spacing: -.03em; }
-.rating--lg .stars { font-size: 16px; letter-spacing: 2px; }
-.rating--lg .rating__count { font-size: 12.5px; }
-
 /* ── Footer ─────────────────────────────────────────────── */
 .table-footer {
   display: flex;
@@ -484,61 +479,87 @@ a { color: inherit; text-decoration: none; }
 }
 @keyframes fade { from { opacity: 0; } }
 
+/* Details drawer — price only, milk & coffee palette */
 .drawer {
   position: fixed;
   top: 0; right: 0; bottom: 0;
-  width: min(420px, 100vw);
+  width: min(380px, 100vw);
   z-index: 80;
-  background: #fff;
-  box-shadow: -24px 0 60px -30px rgba(59, 44, 34, .38);
+  background:
+    radial-gradient(520px 300px at 100% 0%, #fbeedd 0%, transparent 62%),
+    radial-gradient(420px 280px at 0% 100%, #f6e7d5 0%, transparent 60%),
+    #fffaf5;
+  border-left: 1px solid #ecdccb;
+  box-shadow: -24px 0 60px -30px rgba(74, 47, 27, .42);
   transform: translateX(102%);
   transition: transform .34s var(--ease);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
 .drawer.is-open { transform: none; }
-.drawer__inner { padding: 22px 24px 32px; }
+.drawer__inner {
+  padding: 20px 24px 32px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
-.d-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.d-head .item { gap: 13px; }
-.d-head .thumb { width: 52px; height: 52px; border-radius: 14px; font-size: 24px; }
-.d-title { font-size: 17px; font-weight: 650; letter-spacing: -.02em; }
-.d-sub { font-size: 12.5px; color: var(--text-3); margin-top: 2px; }
+.d-head { display: flex; justify-content: flex-end; }
 .d-close {
-  width: 32px; height: 32px;
-  border-radius: 9px;
+  width: 34px; height: 34px;
+  border-radius: 10px;
   display: grid; place-items: center;
-  color: var(--text-3);
-  background: var(--surface-soft);
+  color: #8a6a4f;
+  background: #f5e9db;
+  border: 1px solid #ead7c1;
   flex: none;
-  transition: background .16s, color .16s;
+  transition: background .16s, color .16s, border-color .16s;
 }
-.d-close:hover { background: #f7eee2; color: var(--text); }
+.d-close:hover { background: #eddcc8; color: #4a2f1b; border-color: #dcc3a6; }
 
-.d-section { margin-top: 22px; }
-.d-section__title {
-  font-size: 10.5px;
+/* the one thing that is left: the price */
+.d-price {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  margin: 8px 0 24px;
+  padding: 38px 22px 42px;
+  border-radius: 22px;
+  background: linear-gradient(165deg, #fffdfa 0%, #f7ebdc 52%, #eeddc8 100%);
+  border: 1px solid #ead7c1;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .9),
+    0 18px 38px -24px rgba(110, 72, 40, .38);
+}
+.d-price__badge {
+  width: 54px; height: 54px;
+  margin-bottom: 6px;
+  display: grid; place-items: center;
+  border-radius: 16px;
+  font-size: 24px;
+  line-height: 1;
+  background: linear-gradient(150deg, #c1956b, #7c4f2c);
+  box-shadow: 0 10px 20px -12px rgba(90, 56, 28, .75);
+}
+.d-price__label {
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: .075em;
+  letter-spacing: .11em;
   text-transform: uppercase;
-  color: var(--text-3);
-  margin-bottom: 10px;
+  color: #a3856a;
 }
-.d-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  overflow: hidden;
+.d-price__value {
+  font-size: 46px;
+  font-weight: 700;
+  letter-spacing: -.045em;
+  line-height: 1.1;
+  color: #4a2f1b;
+  font-variant-numeric: tabular-nums;
 }
-.d-grid > div { background: #fff; padding: 11px 13px; }
-.d-grid dt { font-size: 11.5px; color: var(--text-3); }
-.d-grid dd { margin: 3px 0 0; font-size: 13.5px; font-weight: 550; }
-.d-grid .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; }
-
-.d-desc { font-size: 13px; line-height: 1.65; color: var(--text-2); margin: 0; }
 
 /* ── Toasts ─────────────────────────────────────────────── */
 .toasts {
