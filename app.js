@@ -46,12 +46,6 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const money = n => `$${n.toFixed(2)}`;
 
-  const fmtDate = iso => {
-    const d = new Date(iso + "T00:00:00");
-    return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
-      .replace(/ (\d{4})$/, ", $1");
-  };
-
   const esc = str => String(str).replace(/[&<>"']/g, c =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -326,45 +320,18 @@
   const scrim = $("#scrim");
   const drawerInner = $("#drawerInner");
 
+  /* The drawer keeps ONLY the price — everything else (name, category, code,
+     status, rating, stock, margin, description) has been removed. */
   function drawerHTML(item) {
-    const st = STATUS[item.status];
     return `
       <div class="d-head">
-        <div class="item">
-          <span class="thumb" style="background:linear-gradient(160deg,#fff,${item.tint})" aria-hidden="true">${item.emoji}</span>
-          <div>
-            <div class="d-title">${esc(item.name)}</div>
-            <div class="d-sub">${esc(item.category)} · ${esc(item.code)}</div>
-          </div>
-        </div>
-        <button class="d-close" type="button" id="drawerClose" aria-label="Close details">${icon.close}</button>
+        <button class="d-close" type="button" id="drawerClose" aria-label="Close price">${icon.close}</button>
       </div>
 
-      <div class="d-section">
-        <div class="d-section__title">Score &amp; rating</div>
-        <div class="rating rating--lg">${ratingHTML(item).replace('class="rating', 'class="rating rating--lg')}</div>
-      </div>
-
-      <div class="d-section">
-        <div class="d-section__title">Status</div>
-        <div class="status-cell"><span class="chip chip--${st.cls}">${st.label}</span></div>
-      </div>
-
-      <div class="d-section">
-        <div class="d-section__title">Item details</div>
-        <dl class="d-grid">
-          <div><dt>Item ID</dt><dd class="mono">${esc(item.code)}</dd></div>
-          <div><dt>Created</dt><dd>${fmtDate(item.created)}</dd></div>
-          <div><dt>Price</dt><dd>${money(item.price)}</dd></div>
-          <div><dt>Sell price</dt><dd>${money(item.sellPrice)}</dd></div>
-          <div><dt>Stock</dt><dd>${item.stock.toLocaleString("en-US")} pcs</dd></div>
-          <div><dt>Margin</dt><dd>${Math.round((1 - item.price / item.sellPrice) * 100)}%</dd></div>
-        </dl>
-      </div>
-
-      <div class="d-section">
-        <div class="d-section__title">Description</div>
-        <p class="d-desc">${esc(item.desc)}</p>
+      <div class="d-price">
+        <span class="d-price__badge" aria-hidden="true">☕</span>
+        <span class="d-price__label">قیمت</span>
+        <span class="d-price__value">${money(item.price)}</span>
       </div>`;
   }
 
