@@ -1,7 +1,7 @@
 # coffee-menu
 
-A pixel-faithful, dependency-free rebuild of the **Item List** screen from a Coffee Menu
-admin dashboard — plain HTML, CSS and JavaScript (no frameworks, no build step).
+A pixel-faithful, dependency-free **Item List** screen for a read-only Coffee Menu —
+plain HTML, CSS and JavaScript (no frameworks, no build step).
 
 ## Files
 
@@ -9,7 +9,7 @@ admin dashboard — plain HTML, CSS and JavaScript (no frameworks, no build step
 |------|---------|
 | `index.html` | Markup: breadcrumb bar, search + filter toolbar, table, result count, drawer |
 | `styles.css` | All styling: design tokens, table, chips, popovers, drawer, responsive rules |
-| `app.js` | Data + interactivity: search, filters, sorting, status changes, drawer |
+| `app.js` | Data + interactivity: search, filters, sorting, read-only details drawer |
 
 ## Run
 
@@ -27,10 +27,9 @@ python3 -m http.server 8000
 - **Status filter** (`All Status`, `Available` in green, `Unavailable` in red) with live counts.
 - **More Filters** popover: stock level (well stocked / low / out) plus quick sorts.
 - **Sortable columns** — click Item Name, Price or Score & Rating to toggle ascending / descending.
-- **Per-row status menu** — change status inline; chip, counts and toast update instantly.
+- **Read-only user view** — menu items are frozen; no inline status editing, duplication, or modification controls.
 - **Single continuous list** — all matching items are shown together without pagination.
-- **Details drawer** — slides in from the right with item meta, margin, description,
-  status switcher, save and duplicate actions.
+- **Details drawer** — slides in from the right with item meta, status, rating, and description.
 - **Empty state**, **toasts**, reduced-motion support, and keyboard/Escape handling.
 - **Milk & light-coffee palette** — warm cream surfaces, latte-brown accents and golden rating stars.
 - **Responsive** — rows collapse into stacked cards below 900px.

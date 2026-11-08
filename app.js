@@ -1,13 +1,12 @@
 /* ============================================================
    Coffee Menu — Item List
-   Vanilla JS: search · filters · sorting · status change ·
-               details drawer
+   Vanilla JS: search · filters · sorting · details drawer
    ============================================================ */
 (() => {
   "use strict";
 
   /* ── Data ─────────────────────────────────────────────── */
-  const ITEMS = [
+  const ITEMS = Object.freeze([
     { id: "itm_01", code: "#CFE0F9I93", name: "Choco Choco",      category: "Coffee / Chocolate", rating: 4.9, reviews: 1284, price: 2.50, sellPrice: 3.09, stock: 1000, status: "available", created: "2025-01-14", emoji: "🍫", tint: "#f4e7d4", desc: "Double cocoa espresso with steamed milk and a dusting of dark chocolate curls. Our best seller for cold mornings." },
     { id: "itm_02", code: "#CFFE8427F1", name: "Biscuit Cream",    category: "Coffee / Cappuccino", rating: 4.2, reviews: 356, price: 1.50, sellPrice: 2.20, stock: 918,  status: "unavailable",     created: "2025-06-04", emoji: "🍪", tint: "#f6ecd8", desc: "Cappuccino folded with biscuit cream and a crunchy caramel crumb topping." },
     { id: "itm_03", code: "#CFFE3F7SJ2", name: "Sayzen Creme",    category: "Coffee / Cappuccino", rating: 4.7, reviews: 892, price: 2.50, sellPrice: 3.10, stock: 800,  status: "available", created: "2025-02-09", emoji: "☕", tint: "#ede6dc", desc: "Signature house blend with vanilla creme and a soft cinnamon finish." },
@@ -20,13 +19,13 @@
     { id: "itm_10", code: "#CFFE11MQ8",  name: "Mocha Delight",   category: "Coffee / Chocolate", rating: 4.7, reviews: 812, price: 2.50, sellPrice: 3.15, stock: 305,  status: "available", created: "2025-03-02", emoji: "☕", tint: "#ece2d8", desc: "Espresso, cocoa and steamed milk with a soft marshmallow cap." },
     { id: "itm_11", code: "#CFFE83PX2",  name: "Caramel Breeze",  category: "Coffee Latte", rating: 4.1, reviews: 197,       price: 2.50, sellPrice: 3.10, stock: 180,  status: "available", created: "2025-05-19", emoji: "🍯", tint: "#f7eed8", desc: "Salted caramel latte with a cool almond-milk finish. Runs out fast." },
     { id: "itm_12", code: "#CFFE56RT7",  name: "Espresso Bloom",  category: "Coffee / Espresso", rating: 3.9, reviews: 143,  price: 2.50, sellPrice: 3.00, stock: 0,    status: "unavailable",  created: "2025-06-30", emoji: "🫘", tint: "#eae4dc", desc: "Bright floral espresso served with sparkling water. Restocking next month." }
-  ];
+  ].map(item => Object.freeze(item)));
 
   /* ── Status model ─────────────────────────────────────── */
-  const STATUS = {
-    available:   { label: "موجود",   cls: "available",   color: "#5c8a4e" },
-    unavailable: { label: "ناموجود", cls: "unavailable", color: "#c26a55" }
-  };
+  const STATUS = Object.freeze({
+    available:   Object.freeze({ label: "موجود",   cls: "available",   color: "#5c8a4e" }),
+    unavailable: Object.freeze({ label: "ناموجود", cls: "unavailable", color: "#c26a55" })
+  });
 
   const STOCK_FILTERS = {
     all:  { label: "All stock levels" },
@@ -40,9 +39,7 @@
     status: "all",
     stock: "all",
     sortKey: null,
-    sortDir: "asc",
-    // working copy so status edits persist during the session
-    items: ITEMS.map(item => ({ ...item }))
+    sortDir: "asc"
   };
 
   /* ── Helpers ──────────────────────────────────────────── */
@@ -60,8 +57,6 @@
 
   const icon = {
     check: `<svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M3.4 8.4l3 3 6.2-6.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    caret: `<svg viewBox="0 0 16 16" width="13" height="13" fill="none"><path d="M4 6.2l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    arrow: `<svg viewBox="0 0 16 16" width="12" height="12" fill="none"><path d="M3.5 8h9M9 4.5L12.5 8 9 11.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     close: `<svg viewBox="0 0 16 16" width="15" height="15" fill="none"><path d="M4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
     search: `<svg viewBox="0 0 20 20" width="22" height="22" fill="none"><circle cx="9" cy="9" r="5.6" stroke="currentColor" stroke-width="1.4"/><path d="M13.2 13.2L17 17" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`
   };
@@ -71,7 +66,7 @@
     const q = state.q.trim().toLowerCase();
     const stockRule = STOCK_FILTERS[state.stock];
 
-    let list = state.items.filter(item => {
+    let list = ITEMS.filter(item => {
       if (q) {
         const hay = `${item.name} ${item.category} ${item.code} ${item.id}`.toLowerCase();
         if (!hay.includes(q)) return false;
@@ -132,8 +127,6 @@
         <td class="col-status">
           <div class="status-cell">
             <span class="chip chip--${st.cls}">${st.label}</span>
-            <button class="status-btn" type="button" aria-haspopup="true" aria-expanded="false"
-                    aria-label="Change status for ${esc(item.name)}" data-status-menu="${item.id}">${icon.caret}</button>
           </div>
         </td>
         <td class="col-rating">${ratingHTML(item)}</td>
@@ -224,43 +217,17 @@
   window.addEventListener("scroll", closePopover, true);
   window.addEventListener("resize", closePopover);
 
-  /* ── Status menu ──────────────────────────────────────── */
-  function statusMenuHTML(current, withCounts) {
-    const counts = {};
-    state.items.forEach(i => { counts[i.status] = (counts[i.status] || 0) + 1; });
-
-    return `
-      <div class="popover__title">Change Status</div>
-      ${Object.entries(STATUS).map(([key, s]) => `
-        <button class="popover__opt" type="button" role="menuitemradio" data-set-status="${key}"
-                aria-selected="${current === key}">
-          <span class="dot" style="background:${s.color}"></span>
-          ${s.label}
-          ${withCounts ? `<span class="count">${counts[key] || 0}</span>` : `<span class="check">${icon.check}</span>`}
-        </button>`).join("")}`;
-  }
-
-  function setStatus(id, key) {
-    const item = state.items.find(i => i.id === id);
-    if (!item || item.status === key) return;
-    item.status = key;
-    closePopover();
-    render();
-    toast(`${item.name} is now ${STATUS[key].label}`);
-    if ($("#drawer").classList.contains("is-open") && $("#drawer").dataset.id === id) openDrawer(id);
-  }
-
   /* ── Toolbar menus ────────────────────────────────────── */
   $("#statusFilter").addEventListener("click", e => {
     e.stopPropagation();
     const counts = {};
-    state.items.forEach(i => { counts[i.status] = (counts[i.status] || 0) + 1; });
+    ITEMS.forEach(i => { counts[i.status] = (counts[i.status] || 0) + 1; });
 
     const html = `
       <div class="popover__title">Filter by status</div>
       <button class="popover__opt" type="button" data-filter-status="all" aria-selected="${state.status === "all"}">
         <span class="dot" style="background:#c8d2ce"></span> All Status
-        <span class="count">${state.items.length}</span>
+        <span class="count">${ITEMS.length}</span>
       </button>
       <div class="popover__sep"></div>
       ${Object.entries(STATUS).map(([key, s]) => `
@@ -309,19 +276,6 @@
 
   /* ── Table interactions ───────────────────────────────── */
   $("#rows").addEventListener("click", e => {
-    const statusBtn = e.target.closest("[data-status-menu]");
-    if (statusBtn) {
-      e.stopPropagation();
-      const id = statusBtn.dataset.statusMenu;
-      const item = state.items.find(i => i.id === id);
-      const el = showPopover(statusBtn, statusMenuHTML(item.status, false), { align: "start", width: "196px" });
-      el?.querySelectorAll("[data-set-status]").forEach(b =>
-        b.addEventListener("click", () => setStatus(id, b.dataset.setStatus)));
-      return;
-    }
-
-    if (e.target.closest(".col-status")) return;
-
     const detailsBtn = e.target.closest("[data-details]");
     if (detailsBtn) openDrawer(detailsBtn.dataset.details);
 
@@ -392,7 +346,7 @@
       </div>
 
       <div class="d-section">
-        <div class="d-section__title">Current status</div>
+        <div class="d-section__title">Status</div>
         <div class="status-cell"><span class="chip chip--${st.cls}">${st.label}</span></div>
       </div>
 
@@ -411,26 +365,11 @@
       <div class="d-section">
         <div class="d-section__title">Description</div>
         <p class="d-desc">${esc(item.desc)}</p>
-      </div>
-
-      <div class="d-section">
-        <div class="d-section__title">Change status</div>
-        <div class="d-status-list">
-          ${Object.entries(STATUS).map(([key, s]) => `
-            <button type="button" data-drawer-status="${key}" class="${key === item.status ? "is-on" : ""}">
-              <span class="dot" style="background:${s.color}"></span>${s.label}
-            </button>`).join("")}
-        </div>
-      </div>
-
-      <div class="d-actions">
-        <button class="btn btn--primary" type="button" id="drawerSave">Save changes</button>
-        <button class="btn btn--ghost" type="button" id="drawerDuplicate">Duplicate</button>
       </div>`;
   }
 
   function openDrawer(id) {
-    const item = state.items.find(i => i.id === id);
+    const item = ITEMS.find(i => i.id === id);
     if (!item) return;
     closePopover();
     drawer.dataset.id = id;
@@ -443,23 +382,6 @@
     $("#drawerClose").focus({ preventScroll: true });
 
     $("#drawerClose").addEventListener("click", closeDrawer);
-    drawerInner.querySelectorAll("[data-drawer-status]").forEach(b =>
-      b.addEventListener("click", () => {
-        item.status = b.dataset.drawerStatus;
-        openDrawer(id);
-        render();
-      }));
-    $("#drawerSave").addEventListener("click", () => {
-      toast(`${item.name} saved`);
-      closeDrawer();
-    });
-    $("#drawerDuplicate").addEventListener("click", () => {
-      const copy = { ...item, id: `itm_${Date.now()}`, code: `#CF${Math.random().toString(36).slice(2, 8).toUpperCase()}`, status: "unavailable", name: `${item.name} Copy`, created: new Date().toISOString().slice(0, 10) };
-      state.items.unshift(copy);
-      render();
-      toast(`Duplicated “${item.name}” as ${STATUS.unavailable.label}`);
-      openDrawer(copy.id);
-    });
   }
 
   function closeDrawer() {
