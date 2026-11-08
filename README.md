@@ -7,9 +7,9 @@ admin dashboard — plain HTML, CSS and JavaScript (no frameworks, no build step
 
 | File | Purpose |
 |------|---------|
-| `index.html` | Markup: breadcrumb bar, search + filter toolbar, table, pagination, drawer |
+| `index.html` | Markup: breadcrumb bar, search + filter toolbar, table, result count, drawer |
 | `styles.css` | All styling: design tokens, table, chips, popovers, drawer, responsive rules |
-| `app.js` | Data + interactivity: search, filters, sorting, pagination, status changes, drawer |
+| `app.js` | Data + interactivity: search, filters, sorting, status changes, drawer |
 
 ## Run
 
@@ -25,11 +25,10 @@ python3 -m http.server 8000
   Item ID, create date and stock stay in the data and appear in the details drawer.
 - **Search** by item name, category, item ID or code — debounced, keyboard shortcut `⌘K` / `Ctrl+K` / `/`.
 - **Status filter** (`All Status`, `Published`, `Draft List`, `Inactive`, `Out of Stock`) with live counts.
-- **Date range filter** over the create dates.
 - **More Filters** popover: stock level (well stocked / low / out) plus quick sorts.
 - **Sortable columns** — click Item Name, Price or Score & Rating to toggle ascending / descending.
 - **Per-row status menu** — change status inline; chip, counts and toast update instantly.
-- **Pagination** — 5 / 8 / 12 rows per page with a smart page list.
+- **Single continuous list** — all matching items are shown together without pagination.
 - **Details drawer** — slides in from the right with item meta, margin, description,
   status switcher, save and duplicate actions.
 - **Empty state**, **toasts**, reduced-motion support, and keyboard/Escape handling.

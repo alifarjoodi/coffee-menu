@@ -1,7 +1,7 @@
 /* ============================================================
    Coffee Menu — Item List
    Vanilla JS: search · filters · sorting · status change ·
-               pagination · details drawer
+               details drawer
    ============================================================ */
 (() => {
   "use strict";
@@ -30,13 +30,6 @@
     out:       { label: "Out of Stock",cls: "out",       color: "#c98a22" }
   };
 
-  const DATE_RANGES = {
-    all:   { label: "All dates" },
-    q1:    { label: "Jan – Mar 2025", from: "2025-01-01", to: "2025-03-31" },
-    q2:    { label: "Apr – Jun 2025", from: "2025-04-01", to: "2025-06-30" },
-    full:  { label: "01 Jan – 30 Jun 2025", from: "2025-01-01", to: "2025-06-30" }
-  };
-
   const STOCK_FILTERS = {
     all:  { label: "All stock levels" },
     high: { label: "Well stocked",  test: n => n >= 500 },
@@ -47,12 +40,9 @@
   const state = {
     q: "",
     status: "all",
-    date: "full",
     stock: "all",
     sortKey: null,
     sortDir: "asc",
-    page: 1,
-    perPage: 8,
     // working copy so status edits persist during the session
     items: ITEMS.map(item => ({ ...item }))
   };
@@ -74,8 +64,6 @@
     check: `<svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M3.4 8.4l3 3 6.2-6.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     caret: `<svg viewBox="0 0 16 16" width="13" height="13" fill="none"><path d="M4 6.2l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     arrow: `<svg viewBox="0 0 16 16" width="12" height="12" fill="none"><path d="M3.5 8h9M9 4.5L12.5 8 9 11.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    prev: `<svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M9.5 4L5.5 8l4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    next: `<svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M6.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
     close: `<svg viewBox="0 0 16 16" width="15" height="15" fill="none"><path d="M4.2 4.2l7.6 7.6M11.8 4.2l-7.6 7.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
     search: `<svg viewBox="0 0 20 20" width="22" height="22" fill="none"><circle cx="9" cy="9" r="5.6" stroke="currentColor" stroke-width="1.4"/><path d="M13.2 13.2L17 17" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`
   };
@@ -83,7 +71,6 @@
   /* ── Filtering / sorting ──────────────────────────────── */
   function filtered() {
     const q = state.q.trim().toLowerCase();
-    const range = DATE_RANGES[state.date];
     const stockRule = STOCK_FILTERS[state.stock];
 
     let list = state.items.filter(item => {
@@ -92,7 +79,6 @@
         if (!hay.includes(q)) return false;
       }
       if (state.status !== "all" && item.status !== state.status) return false;
-      if (range.from && (item.created < range.from || item.created > range.to)) return false;
       if (stockRule.test && !stockRule.test(item.stock)) return false;
       return true;
     });
@@ -168,44 +154,12 @@
       </td></tr>`;
   }
 
-  function pagerHTML(totalPages) {
-    const p = state.page;
-    const nums = [];
-    const push = n => nums.push(n);
-    if (totalPages <= 6) {
-      for (let i = 1; i <= totalPages; i++) push(i);
-    } else {
-      push(1);
-      if (p > 3) nums.push("…");
-      for (let i = Math.max(2, p - 1); i <= Math.min(totalPages - 1, p + 1); i++) push(i);
-      if (p < totalPages - 2) nums.push("…");
-      push(totalPages);
-    }
-
-    return `
-      <button type="button" data-page="prev" ${p === 1 ? "disabled" : ""} aria-label="Previous page">${icon.prev}</button>
-      ${nums.map(n => n === "…"
-        ? `<span class="dots">…</span>`
-        : `<button type="button" data-page="${n}" class="${n === p ? "is-current" : ""}" aria-current="${n === p ? "page" : "false"}">${n}</button>`).join("")}
-      <button type="button" data-page="next" ${p === totalPages ? "disabled" : ""} aria-label="Next page">${icon.next}</button>`;
-  }
-
   function render() {
     const list = filtered();
     const total = list.length;
-    const totalPages = Math.max(1, Math.ceil(total / state.perPage));
-    if (state.page > totalPages) state.page = totalPages;
-
-    const start = (state.page - 1) * state.perPage;
-    const pageItems = list.slice(start, start + state.perPage);
-
-    $("#rows").innerHTML = pageItems.length ? pageItems.map(rowHTML).join("") : emptyHTML();
-    $("#pager").innerHTML = pagerHTML(totalPages);
-
-    const from = total ? start + 1 : 0;
-    const to = Math.min(start + state.perPage, total);
+    $("#rows").innerHTML = total ? list.map(rowHTML).join("") : emptyHTML();
     $("#resultCount").innerHTML = total
-      ? `Showing <b>${from}–${to}</b> of <b>${total}</b> items`
+      ? `Showing <b>${total}</b> ${total === 1 ? "item" : "items"}`
       : `No items found`;
     $("#topCount").textContent = total;
 
@@ -222,9 +176,6 @@
     // filter button feedback
     $("#statusFilterLabel").textContent = state.status === "all" ? "All Status" : STATUS[state.status].label;
     $("#statusFilter").classList.toggle("is-active", state.status !== "all");
-
-    $("#dateFilterLabel").textContent = DATE_RANGES[state.date].label;
-    $("#dateFilter").classList.toggle("is-active", state.date !== "full");
 
     $("#moreFiltersDot").hidden = state.stock === "all";
     $("#moreFilters").classList.toggle("is-active", state.stock !== "all");
@@ -323,26 +274,6 @@
     const el = showPopover(e.currentTarget, html, { align: "end", width: "220px" });
     el?.querySelectorAll("[data-filter-status]").forEach(b => b.addEventListener("click", () => {
       state.status = b.dataset.filterStatus;
-      state.page = 1;
-      closePopover();
-      render();
-    }));
-  });
-
-  $("#dateFilter").addEventListener("click", e => {
-    e.stopPropagation();
-    const html = `
-      <div class="popover__title">Created date</div>
-      ${Object.entries(DATE_RANGES).map(([key, d]) => `
-        <button class="popover__opt" type="button" data-filter-date="${key}" aria-selected="${state.date === key}">
-          ${d.label}
-          <span class="check">${icon.check}</span>
-        </button>`).join("")}`;
-
-    const el = showPopover(e.currentTarget, html, { align: "end", width: "224px" });
-    el?.querySelectorAll("[data-filter-date]").forEach(b => b.addEventListener("click", () => {
-      state.date = b.dataset.filterDate;
-      state.page = 1;
       closePopover();
       render();
     }));
@@ -367,14 +298,12 @@
     if (!el) return;
     el.querySelectorAll("[data-filter-stock]").forEach(b => b.addEventListener("click", () => {
       state.stock = b.dataset.filterStock;
-      state.page = 1;
       closePopover();
       render();
     }));
     el.querySelectorAll("[data-sort-quick]").forEach(b => b.addEventListener("click", () => {
       state.sortKey = b.dataset.sortQuick;
       state.sortDir = b.dataset.sortQuick === "price" ? "desc" : "asc";
-      state.page = 1;
       closePopover();
       render();
     }));
@@ -418,26 +347,8 @@
         state.sortKey = key;
         state.sortDir = key === "name" ? "asc" : "desc";
       }
-      state.page = 1;
       render();
     });
-  });
-
-  $("#pager").addEventListener("click", e => {
-    const btn = e.target.closest("button[data-page]");
-    if (!btn || btn.disabled) return;
-    const totalPages = Math.max(1, Math.ceil(filtered().length / state.perPage));
-    const v = btn.dataset.page;
-    if (v === "prev") state.page = Math.max(1, state.page - 1);
-    else if (v === "next") state.page = Math.min(totalPages, state.page + 1);
-    else state.page = Number(v);
-    render();
-  });
-
-  $("#perPage").addEventListener("change", e => {
-    state.perPage = Number(e.target.value);
-    state.page = 1;
-    render();
   });
 
   /* ── Search ───────────────────────────────────────────── */
@@ -447,13 +358,12 @@
     const v = e.target.value;
     searchTimer = setTimeout(() => {
       state.q = v;
-      state.page = 1;
       render();
     }, 130);
   });
 
   function resetFilters() {
-    Object.assign(state, { q: "", status: "all", date: "all", stock: "all", sortKey: null, page: 1 });
+    Object.assign(state, { q: "", status: "all", stock: "all", sortKey: null });
     $("#search").value = "";
     render();
     toast("Filters reset");
@@ -548,8 +458,6 @@
     $("#drawerDuplicate").addEventListener("click", () => {
       const copy = { ...item, id: `itm_${Date.now()}`, code: `#CF${Math.random().toString(36).slice(2, 8).toUpperCase()}`, status: "draft", name: `${item.name} Copy`, created: new Date().toISOString().slice(0, 10) };
       state.items.unshift(copy);
-      state.date = "all";
-      state.page = 1;
       render();
       toast(`Duplicated “${item.name}” as draft`);
       openDrawer(copy.id);
