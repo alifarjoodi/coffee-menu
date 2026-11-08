@@ -361,17 +361,6 @@ a { color: inherit; text-decoration: none; }
 .chip--unavailable { color: var(--red); background: var(--red-soft); border-color: #f6d7cd; }
 
 .status-cell { display: flex; align-items: center; gap: 4px; }
-.status-btn {
-  display: inline-grid;
-  place-items: center;
-  width: 24px; height: 24px;
-  border-radius: 7px;
-  color: #b8a493;
-  transition: background .16s, color .16s, transform .16s;
-}
-.status-btn:hover { background: #f8f0e6; color: var(--text-2); }
-.status-btn svg { transition: transform .2s var(--ease); }
-.status-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
 
 /* score & rating */
 .rating { display: flex; align-items: center; gap: 9px; min-width: 0; }
@@ -550,41 +539,6 @@ a { color: inherit; text-decoration: none; }
 .d-grid .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; }
 
 .d-desc { font-size: 13px; line-height: 1.65; color: var(--text-2); margin: 0; }
-
-.d-status-list { display: flex; flex-wrap: wrap; gap: 7px; }
-.d-status-list button {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 11px;
-  border-radius: 999px;
-  border: 1px solid var(--line-strong);
-  font-size: 12px;
-  font-weight: 550;
-  color: var(--text-2);
-  background: #fff;
-  transition: all .16s;
-}
-.d-status-list button:hover { border-color: #ddc9b5; background: #fffaf4; }
-.d-status-list button.is-on { border-color: var(--mint-line); background: var(--mint-soft); color: var(--mint); font-weight: 650; }
-.d-status-list .dot { width: 6px; height: 6px; border-radius: 50%; }
-
-.d-actions { display: flex; gap: 9px; margin-top: 24px; }
-.btn {
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  transition: background .16s, color .16s, border-color .16s, transform .12s;
-}
-.btn:active { transform: translateY(1px); }
-.btn--primary { background: var(--mint); color: #fff; flex: 1; box-shadow: 0 8px 18px -10px rgba(140, 96, 58, .75); }
-.btn--primary:hover { background: #8b5a34; }
-.btn--ghost { border: 1px solid var(--line-strong); color: var(--text-2); background: #fff; }
-.btn--ghost:hover { background: #fffaf4; color: var(--text); }
 
 /* ── Toasts ─────────────────────────────────────────────── */
 .toasts {
