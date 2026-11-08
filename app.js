@@ -8,18 +8,18 @@
 
   /* ── Data ─────────────────────────────────────────────── */
   const ITEMS = [
-    { id: "itm_01", code: "#CFE0F9I93", name: "Choco Choco",      category: "Coffee / Chocolate", price: 2.50, sellPrice: 3.09, stock: 1000, status: "published", created: "2025-01-14", emoji: "🍫", tint: "#f4e7d4", desc: "Double cocoa espresso with steamed milk and a dusting of dark chocolate curls. Our best seller for cold mornings." },
-    { id: "itm_02", code: "#CFFE8427F1", name: "Biscuit Cream",    category: "Coffee / Cappuccino", price: 1.50, sellPrice: 2.20, stock: 918,  status: "draft",     created: "2025-06-04", emoji: "🍪", tint: "#f6ecd8", desc: "Cappuccino folded with biscuit cream and a crunchy caramel crumb topping." },
-    { id: "itm_03", code: "#CFFE3F7SJ2", name: "Sayzen Creme",    category: "Coffee / Cappuccino", price: 2.50, sellPrice: 3.10, stock: 800,  status: "published", created: "2025-02-09", emoji: "☕", tint: "#ede6dc", desc: "Signature house blend with vanilla creme and a soft cinnamon finish." },
-    { id: "itm_04", code: "#CFFE6535B4", name: "Vanilla C Latte", category: "Coffee Latte",       price: 2.50, sellPrice: 3.05, stock: 772,  status: "published", created: "2025-02-21", emoji: "🥛", tint: "#f3efe4", desc: "Slow-pulled espresso, oat milk and Madagascar vanilla syrup over ice." },
-    { id: "itm_05", code: "#CFFE2D4F71", name: "Banana Chiki",    category: "Coffee / Espresso",  price: 1.50, sellPrice: 2.10, stock: 750,  status: "inactive",  created: "2025-05-03", emoji: "🍌", tint: "#f8f0cf", desc: "Espresso shot with banana milk and a hint of nutmeg. Temporarily paused for the season." },
-    { id: "itm_06", code: "#CFFE7284J0", name: "Burnt Leci Latte",category: "Coffee Latte",       price: 2.50, sellPrice: 3.10, stock: 640,  status: "published", created: "2025-03-17", emoji: "🌰", tint: "#f0e4d8", desc: "Caramelised lychee syrup, espresso and milk with a burnt-sugar crust aroma." },
-    { id: "itm_07", code: "#CFFE4N9B5",  name: "Java Bali Latte", category: "Coffee Latte",       price: 1.50, sellPrice: 2.40, stock: 500,  status: "out",       created: "2025-04-08", emoji: "🌿", tint: "#e4efe0", desc: "Single-origin Balinese beans with palm sugar and coconut milk." },
-    { id: "itm_08", code: "#CFEY2D047",  name: "Sweet Sally",     category: "Coffee / Espresso",  price: 2.50, sellPrice: 3.05, stock: 999,  status: "out",       created: "2025-06-11", emoji: "🍮", tint: "#f7e8dc", desc: "Vanilla custard espresso, finished with demerara sugar and a pinch of sea salt." },
-    { id: "itm_09", code: "#CFFE90KL3",  name: "Hazelnut Cloud",  category: "Coffee Latte",       price: 2.50, sellPrice: 3.20, stock: 420,  status: "draft",     created: "2025-01-28", emoji: "🌰", tint: "#f1e6d6", desc: "Whipped hazelnut foam over a double shot, topped with toasted nut praline." },
-    { id: "itm_10", code: "#CFFE11MQ8",  name: "Mocha Delight",   category: "Coffee / Chocolate", price: 2.50, sellPrice: 3.15, stock: 305,  status: "published", created: "2025-03-02", emoji: "☕", tint: "#ece2d8", desc: "Espresso, cocoa and steamed milk with a soft marshmallow cap." },
-    { id: "itm_11", code: "#CFFE83PX2",  name: "Caramel Breeze",  category: "Coffee Latte",       price: 2.50, sellPrice: 3.10, stock: 180,  status: "published", created: "2025-05-19", emoji: "🍯", tint: "#f7eed8", desc: "Salted caramel latte with a cool almond-milk finish. Runs out fast." },
-    { id: "itm_12", code: "#CFFE56RT7",  name: "Espresso Bloom",  category: "Coffee / Espresso",  price: 2.50, sellPrice: 3.00, stock: 0,    status: "inactive",  created: "2025-06-30", emoji: "🫘", tint: "#eae4dc", desc: "Bright floral espresso served with sparkling water. Restocking next month." }
+    { id: "itm_01", code: "#CFE0F9I93", name: "Choco Choco",      category: "Coffee / Chocolate", rating: 4.9, reviews: 1284, price: 2.50, sellPrice: 3.09, stock: 1000, status: "published", created: "2025-01-14", emoji: "🍫", tint: "#f4e7d4", desc: "Double cocoa espresso with steamed milk and a dusting of dark chocolate curls. Our best seller for cold mornings." },
+    { id: "itm_02", code: "#CFFE8427F1", name: "Biscuit Cream",    category: "Coffee / Cappuccino", rating: 4.2, reviews: 356, price: 1.50, sellPrice: 2.20, stock: 918,  status: "draft",     created: "2025-06-04", emoji: "🍪", tint: "#f6ecd8", desc: "Cappuccino folded with biscuit cream and a crunchy caramel crumb topping." },
+    { id: "itm_03", code: "#CFFE3F7SJ2", name: "Sayzen Creme",    category: "Coffee / Cappuccino", rating: 4.7, reviews: 892, price: 2.50, sellPrice: 3.10, stock: 800,  status: "published", created: "2025-02-09", emoji: "☕", tint: "#ede6dc", desc: "Signature house blend with vanilla creme and a soft cinnamon finish." },
+    { id: "itm_04", code: "#CFFE6535B4", name: "Vanilla C Latte", category: "Coffee Latte", rating: 4.8, reviews: 1041,       price: 2.50, sellPrice: 3.05, stock: 772,  status: "published", created: "2025-02-21", emoji: "🥛", tint: "#f3efe4", desc: "Slow-pulled espresso, oat milk and Madagascar vanilla syrup over ice." },
+    { id: "itm_05", code: "#CFFE2D4F71", name: "Banana Chiki",    category: "Coffee / Espresso", rating: 3.6, reviews: 214,  price: 1.50, sellPrice: 2.10, stock: 750,  status: "inactive",  created: "2025-05-03", emoji: "🍌", tint: "#f8f0cf", desc: "Espresso shot with banana milk and a hint of nutmeg. Temporarily paused for the season." },
+    { id: "itm_06", code: "#CFFE7284J0", name: "Burnt Leci Latte",category: "Coffee Latte", rating: 4.5, reviews: 476,       price: 2.50, sellPrice: 3.10, stock: 640,  status: "published", created: "2025-03-17", emoji: "🌰", tint: "#f0e4d8", desc: "Caramelised lychee syrup, espresso and milk with a burnt-sugar crust aroma." },
+    { id: "itm_07", code: "#CFFE4N9B5",  name: "Java Bali Latte", category: "Coffee Latte", rating: 4.4, reviews: 631,       price: 1.50, sellPrice: 2.40, stock: 500,  status: "out",       created: "2025-04-08", emoji: "🌿", tint: "#e4efe0", desc: "Single-origin Balinese beans with palm sugar and coconut milk." },
+    { id: "itm_08", code: "#CFEY2D047",  name: "Sweet Sally",     category: "Coffee / Espresso", rating: 4.6, reviews: 738,  price: 2.50, sellPrice: 3.05, stock: 999,  status: "out",       created: "2025-06-11", emoji: "🍮", tint: "#f7e8dc", desc: "Vanilla custard espresso, finished with demerara sugar and a pinch of sea salt." },
+    { id: "itm_09", code: "#CFFE90KL3",  name: "Hazelnut Cloud",  category: "Coffee Latte", rating: 4.3, reviews: 289,       price: 2.50, sellPrice: 3.20, stock: 420,  status: "draft",     created: "2025-01-28", emoji: "🌰", tint: "#f1e6d6", desc: "Whipped hazelnut foam over a double shot, topped with toasted nut praline." },
+    { id: "itm_10", code: "#CFFE11MQ8",  name: "Mocha Delight",   category: "Coffee / Chocolate", rating: 4.7, reviews: 812, price: 2.50, sellPrice: 3.15, stock: 305,  status: "published", created: "2025-03-02", emoji: "☕", tint: "#ece2d8", desc: "Espresso, cocoa and steamed milk with a soft marshmallow cap." },
+    { id: "itm_11", code: "#CFFE83PX2",  name: "Caramel Breeze",  category: "Coffee Latte", rating: 4.1, reviews: 197,       price: 2.50, sellPrice: 3.10, stock: 180,  status: "published", created: "2025-05-19", emoji: "🍯", tint: "#f7eed8", desc: "Salted caramel latte with a cool almond-milk finish. Runs out fast." },
+    { id: "itm_12", code: "#CFFE56RT7",  name: "Espresso Bloom",  category: "Coffee / Espresso", rating: 3.9, reviews: 143,  price: 2.50, sellPrice: 3.00, stock: 0,    status: "inactive",  created: "2025-06-30", emoji: "🫘", tint: "#eae4dc", desc: "Bright floral espresso served with sparkling water. Restocking next month." }
   ];
 
   /* ── Status model ─────────────────────────────────────── */
@@ -60,7 +60,6 @@
   /* ── Helpers ──────────────────────────────────────────── */
   const $ = (sel, root = document) => root.querySelector(sel);
   const money = n => `$${n.toFixed(2)}`;
-  const stockClass = n => (n === 0 ? "is-out" : n < 500 ? "is-low" : "");
 
   const fmtDate = iso => {
     const d = new Date(iso + "T00:00:00");
@@ -111,11 +110,28 @@
     return list;
   }
 
+  /* ── Rating ───────────────────────────────────────────── */
+  const pctOf = r => Math.max(0, Math.min(100, (r / 5) * 100)).toFixed(0) + "%";
+
+  function ratingHTML(item) {
+    const pct = pctOf(item.rating);
+    return `
+      <div class="rating" aria-label="Rated ${item.rating} out of 5 from ${item.reviews} reviews">
+        <span class="rating__score">${item.rating.toFixed(1)}</span>
+        <span class="stars" style="--pct:${pct}" aria-hidden="true">
+          <span class="stars__base">★★★★★</span>
+          <span class="stars__fill">★★★★★</span>
+        </span>
+        <span class="rating__count">${item.reviews.toLocaleString("en-US")} reviews</span>
+      </div>`;
+  }
+
   /* ── Row rendering ────────────────────────────────────── */
   function rowHTML(item) {
     const st = STATUS[item.status];
     return `
-      <tr data-id="${item.id}">
+      <tr data-id="${item.id}" data-details="${item.id}" class="row" tabindex="0"
+          aria-label="View details for ${esc(item.name)}">
         <td class="col-item">
           <div class="item">
             <span class="thumb" style="background:linear-gradient(160deg,#fff,${item.tint})" aria-hidden="true">${item.emoji}</span>
@@ -125,16 +141,9 @@
             </span>
           </div>
         </td>
-        <td class="col-id">
-          <div class="code">${esc(item.code)}</div>
-          <div class="meta-date">${fmtDate(item.created)}</div>
-        </td>
         <td class="col-price">
           <div class="price-now">${money(item.price)}</div>
           <div class="price-old">Sell Price <span>${money(item.sellPrice)}</span></div>
-        </td>
-        <td class="col-stock">
-          <span class="stock ${stockClass(item.stock)}">${item.stock.toLocaleString("en-US")}</span>
         </td>
         <td class="col-status">
           <div class="status-cell">
@@ -143,19 +152,17 @@
                     aria-label="Change status for ${esc(item.name)}" data-status-menu="${item.id}">${icon.caret}</button>
           </div>
         </td>
-        <td class="col-action">
-          <button class="action-btn" type="button" data-details="${item.id}">View Details ${icon.arrow}</button>
-        </td>
+        <td class="col-rating">${ratingHTML(item)}</td>
       </tr>`;
   }
 
   function emptyHTML() {
     return `
-      <tr><td colspan="6">
+      <tr><td colspan="4">
         <div class="empty">
           <div class="empty__icon">${icon.search}</div>
           <h3>No items match your filters</h3>
-          <p>Try a different keyword or reset the filters to see all 12 items.</p>
+          <p>Try a different keyword, or reset the filters to see every item again.</p>
           <button type="button" id="resetFilters">Reset filters</button>
         </div>
       </td></tr>`;
@@ -352,9 +359,6 @@
         </button>`).join("")}
       <div class="popover__sep"></div>
       <div class="popover__title">Sort</div>
-      <button class="popover__opt" type="button" data-sort-quick="stock" aria-selected="${state.sortKey === "stock" && state.sortDir === "asc"}">
-        Stock: low → high <span class="check">${icon.check}</span>
-      </button>
       <button class="popover__opt" type="button" data-sort-quick="price" aria-selected="${state.sortKey === "price" && state.sortDir === "desc"}">
         Price: high → low <span class="check">${icon.check}</span>
       </button>`;
@@ -389,10 +393,20 @@
       return;
     }
 
+    if (e.target.closest(".col-status")) return;
+
     const detailsBtn = e.target.closest("[data-details]");
     if (detailsBtn) openDrawer(detailsBtn.dataset.details);
 
     if (e.target.id === "resetFilters") resetFilters();
+  });
+
+  $("#rows").addEventListener("keydown", e => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const row = e.target.closest("tr.row");
+    if (!row || e.target.closest("button")) return;
+    e.preventDefault();
+    openDrawer(row.dataset.details);
   });
 
   document.querySelectorAll(".sort").forEach(btn => {
@@ -402,7 +416,7 @@
         state.sortDir = state.sortDir === "asc" ? "desc" : "asc";
       } else {
         state.sortKey = key;
-        state.sortDir = key === "price" || key === "stock" ? "desc" : "asc";
+        state.sortDir = key === "name" ? "asc" : "desc";
       }
       state.page = 1;
       render();
@@ -462,6 +476,11 @@
           </div>
         </div>
         <button class="d-close" type="button" id="drawerClose" aria-label="Close details">${icon.close}</button>
+      </div>
+
+      <div class="d-section">
+        <div class="d-section__title">Score &amp; rating</div>
+        <div class="rating rating--lg">${ratingHTML(item).replace('class="rating', 'class="rating rating--lg')}</div>
       </div>
 
       <div class="d-section">
