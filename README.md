@@ -24,7 +24,7 @@ python3 -m http.server 8000
   **Price & Sell Price**, **Status**, and **Score & Rating** (score out of 5, star bar and review count).
   Item ID, create date and stock stay in the data and appear in the details drawer.
 - **Search** by item name, category, item ID or code — debounced, keyboard shortcut `⌘K` / `Ctrl+K` / `/`.
-- **Status filter** (`All Status`, `Published`, `Draft List`, `Inactive`, `Out of Stock`) with live counts.
+- **Status filter** (`All Status`, `Available` in green, `Unavailable` in red) with live counts.
 - **More Filters** popover: stock level (well stocked / low / out) plus quick sorts.
 - **Sortable columns** — click Item Name, Price or Score & Rating to toggle ascending / descending.
 - **Per-row status menu** — change status inline; chip, counts and toast update instantly.
