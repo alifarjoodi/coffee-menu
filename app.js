@@ -24,8 +24,8 @@
 
   /* ── Status model ─────────────────────────────────────── */
   const STATUS = {
-    available:   { label: "Available",   cls: "available",   color: "#5c8a4e" },
-    unavailable: { label: "Unavailable", cls: "unavailable", color: "#c26a55" }
+    available:   { label: "موجود",   cls: "available",   color: "#5c8a4e" },
+    unavailable: { label: "ناموجود", cls: "unavailable", color: "#c26a55" }
   };
 
   const STOCK_FILTERS = {
@@ -457,7 +457,7 @@
       const copy = { ...item, id: `itm_${Date.now()}`, code: `#CF${Math.random().toString(36).slice(2, 8).toUpperCase()}`, status: "unavailable", name: `${item.name} Copy`, created: new Date().toISOString().slice(0, 10) };
       state.items.unshift(copy);
       render();
-      toast(`Duplicated “${item.name}” as unavailable`);
+      toast(`Duplicated “${item.name}” as ${STATUS.unavailable.label}`);
       openDrawer(copy.id);
     });
   }
