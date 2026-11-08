@@ -479,7 +479,7 @@ a { color: inherit; text-decoration: none; }
 }
 @keyframes fade { from { opacity: 0; } }
 
-/* Details drawer — price only, milk & coffee palette */
+/* Details drawer — image · name · description on top, price below */
 .drawer {
   position: fixed;
   top: 0; right: 0; bottom: 0;
@@ -517,62 +517,19 @@ a { color: inherit; text-decoration: none; }
 }
 .d-close:hover { background: #eddcc8; color: #4a2f1b; border-color: #dcc3a6; }
 
-/* the one thing that is left: the price */
-.d-price {
+/* Details block on top: image · name · description.
+   Flex column + word-break keep the three from overlapping each other. */
+.d-details {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  text-align: center;
-  margin: 8px 0 22px;
-  padding: 38px 22px 42px;
-  border-radius: 22px;
-  background: linear-gradient(165deg, #fffdfa 0%, #f7ebdc 52%, #eeddc8 100%);
-  border: 1px solid #ead7c1;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .9),
-    0 18px 38px -24px rgba(110, 72, 40, .38);
-}
-.d-price__badge {
-  width: 54px; height: 54px;
-  margin-bottom: 6px;
-  display: grid; place-items: center;
-  border-radius: 16px;
-  font-size: 24px;
-  line-height: 1;
-  background: linear-gradient(150deg, #c1956b, #7c4f2c);
-  box-shadow: 0 10px 20px -12px rgba(90, 56, 28, .75);
-}
-.d-price__label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .11em;
-  text-transform: uppercase;
-  color: #a3856a;
-}
-.d-price__value {
-  font-size: 46px;
-  font-weight: 700;
-  letter-spacing: -.045em;
-  line-height: 1.1;
-  color: #4a2f1b;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Details block below the price: image · name · description.
-   Flex column + word-break keep the three from overlapping each other. */
-.d-details {
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   text-align: center;
   gap: 12px;
-  margin-top: 4px;
-  padding-top: 20px;
-  border-top: 1px solid #ecdccb;
+  margin: 8px 0 22px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #ecdccb;
   word-break: break-word;
   overflow-wrap: anywhere;
 }
@@ -605,6 +562,40 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.65;
   color: var(--text-2);
   max-width: 100%;
+}
+
+/* the price card, now sitting below the details */
+.d-price {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  margin-top: 4px;
+  padding: 28px 22px 30px;
+  border-radius: 22px;
+  background: linear-gradient(165deg, #fffdfa 0%, #f7ebdc 52%, #eeddc8 100%);
+  border: 1px solid #ead7c1;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .9),
+    0 18px 38px -24px rgba(110, 72, 40, .38);
+}
+.d-price__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+  color: #a3856a;
+}
+.d-price__value {
+  font-size: 46px;
+  font-weight: 700;
+  letter-spacing: -.045em;
+  line-height: 1.1;
+  color: #4a2f1b;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Toasts ─────────────────────────────────────────────── */

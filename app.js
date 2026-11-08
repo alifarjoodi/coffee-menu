@@ -320,24 +320,23 @@
   const scrim = $("#scrim");
   const drawerInner = $("#drawerInner");
 
-  /* Drawer layout: price on top, then (below) the item's image, name and
-     description stacked in a flex column so the three never overlap. */
+  /* Drawer layout: the item's image, name and description on top, then (below)
+     the price. Everything stacks in a flex column so nothing ever overlaps. */
   function drawerHTML(item) {
     return `
       <div class="d-head">
         <button class="d-close" type="button" id="drawerClose" aria-label="Close details">${icon.close}</button>
       </div>
 
-      <div class="d-price">
-        <span class="d-price__badge" aria-hidden="true">☕</span>
-        <span class="d-price__label">قیمت</span>
-        <span class="d-price__value">${money(item.price)}</span>
-      </div>
-
       <div class="d-details">
         <div class="d-thumb" style="background:linear-gradient(160deg,#fff,${item.tint})" aria-hidden="true">${item.emoji}</div>
         <h2 class="d-name">${esc(item.name)}</h2>
         <p class="d-desc">${esc(item.desc)}</p>
+      </div>
+
+      <div class="d-price">
+        <span class="d-price__label">قیمت</span>
+        <span class="d-price__value">${money(item.price)}</span>
       </div>`;
   }
 
