@@ -326,24 +326,77 @@
   const scrim = $("#scrim");
   const drawerInner = $("#drawerInner");
 
-  /* Drawer layout: the item's image, name and description on top, then (below)
-     the price. Everything stacks in a flex column so nothing ever overlaps. */
+  /* ── Cart quantities (kept while the page is open) ────── */
+  const cart = new Map(); // itemId -> quantity
+  const cartQty = id => cart.get(id) || 0;
+
+  const iconPlus = `<svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true"><path d="M10 4.4v11.2M4.4 10h11.2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>`;
+  const iconMinus = `<svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true"><path d="M4.4 10h11.2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>`;
+  const iconBag = `<svg viewBox="0 0 20 20" width="17" height="17" fill="none" aria-hidden="true"><path d="M2.7 3.4h1.9l1.6 8.3h8.1l1.5-6.1H5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.7" cy="15.3" r="1.25" fill="currentColor"/><circle cx="13.9" cy="15.3" r="1.25" fill="currentColor"/></svg>`;
+
+  /* Bottom control: “افزودن به سبد خرید” — once clicked it turns into a
+     stepper (minus · quantity · plus) sitting in the same spot. */
+  function cartControlHTML(item) {
+    const qty = cartQty(item.id);
+    if (!qty) {
+      return `
+        <button class="d-add" type="button" data-cart-add="${item.id}">
+          ${iconBag}<span>افزودن به سبد خرید</span>
+        </button>`;
+    }
+    return `
+      <div class="d-qty" role="group" aria-label="تعداد ${esc(item.name)}">
+        <button class="d-qty__btn" type="button" data-cart-step="-1" aria-label="کاهش تعداد">${iconMinus}</button>
+        <span class="d-qty__value" aria-live="polite">${qty}</span>
+        <button class="d-qty__btn" type="button" data-cart-step="1" aria-label="افزایش تعداد">${iconPlus}</button>
+      </div>`;
+  }
+
+  /* Drawer layout: product image on the top right (with a little breathing room
+     from the top edge), the name to its left vertically centred on the image,
+     the price right below the image, the description underneath, and the
+     add-to-cart control pinned to the bottom. */
   function drawerHTML(item) {
     return `
       <div class="d-head">
         <button class="d-close" type="button" id="drawerClose" aria-label="Close details">${icon.close}</button>
       </div>
 
-      <div class="d-details">
-        <div class="d-thumb" style="background:linear-gradient(160deg,#fff,${item.tint})" aria-hidden="true">${item.emoji}</div>
-        <h2 class="d-name">${esc(item.name)}</h2>
-        <p class="d-desc">${esc(item.desc)}</p>
+      <div class="d-top">
+        <div class="d-figure">
+          <div class="d-thumb" style="background:linear-gradient(160deg,#fffdf8,${item.tint})" aria-hidden="true">${item.emoji}</div>
+          <div class="d-price">
+            <span class="d-price__label">قیمت</span>
+            <span class="d-price__value">${money(item.price)}</span>
+          </div>
+        </div>
+
+        <div class="d-summary">
+          <h2 class="d-name">${esc(item.name)}</h2>
+          <span class="d-cat">${esc(item.category)}</span>
+        </div>
       </div>
 
-      <div class="d-price">
-        <span class="d-price__label">قیمت</span>
-        <span class="d-price__value">${money(item.price)}</span>
-      </div>`;
+      <p class="d-desc">${esc(item.desc)}</p>
+
+      <div class="d-actions" id="cartActions">${cartControlHTML(item)}</div>`;
+  }
+
+  /* Re-render only the bottom control, so the stepper appears/disappears in place. */
+  function refreshCart({ focusSel = null } = {}) {
+    const item = ITEMS.find(i => i.id === drawer.dataset.id);
+    const wrap = $("#cartActions");
+    if (!item || !wrap) return;
+
+    wrap.innerHTML = cartControlHTML(item);
+    wrap.classList.remove("is-swap");
+    void wrap.offsetWidth; // restart the pop animation
+    wrap.classList.add("is-swap");
+
+    if (focusSel) {
+      const target = wrap.querySelector(focusSel) || wrap.querySelector("button");
+      if (target) target.focus({ preventScroll: true });
+    }
   }
 
   function openDrawer(id) {
@@ -361,6 +414,29 @@
 
     $("#drawerClose").addEventListener("click", closeDrawer);
   }
+
+  /* Cart interactions inside the drawer (delegated: innerHTML is re-rendered). */
+  drawerInner.addEventListener("click", e => {
+    const add = e.target.closest("[data-cart-add]");
+    if (add) {
+      cart.set(add.dataset.cartAdd, 1);
+      refreshCart({ focusSel: "[data-cart-step='1']" });
+      toast("به سبد خرید اضافه شد");
+      return;
+    }
+
+    const stepBtn = e.target.closest("[data-cart-step]");
+    if (!stepBtn) return;
+
+    const id = drawer.dataset.id;
+    const step = Number(stepBtn.dataset.cartStep);
+    const next = Math.max(0, cartQty(id) + step);
+
+    if (next === 0) cart.delete(id);
+    else cart.set(id, next);
+
+    refreshCart({ focusSel: step > 0 ? "[data-cart-step='1']" : "[data-cart-step='-1']" });
+  });
 
   function closeDrawer() {
     drawer.classList.remove("is-open");
