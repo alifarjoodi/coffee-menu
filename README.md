@@ -29,11 +29,15 @@ python3 -m http.server 8000
 - **Read-only user view** — menu items are frozen; no inline status editing, duplication, or modification controls.
 - **Single continuous list** — all matching items are shown together without pagination.
 - **Details drawer** — slides in from the right. The product **image sits at the top right** (with a little
-  breathing room from the top edge), the **name is beside it on the left, vertically centred on the image**,
-  and the **price sits directly below the image**. The description follows underneath.
-- **Add to cart** — a milky/coffee `افزودن به سبد خرید` button is pinned to the bottom of the drawer. Once
-  clicked it turns into a quantity stepper: **− · quantity · +**, in the same spot. The quantity is kept
-  per item while the page is open, and stepping back to zero restores the add button.
+  breathing room from the top edge), the **name is glued to the top of the image**, and the **price has no
+  box around it**: it is flush to the left, **10px in from the drawer's left edge**. The description sits
+  last, further down the panel.
+- **Add to cart** — a milky/coffee `افزودن به سبد خرید` button sits directly under the image/price block
+  (no longer pinned to the bottom). Once clicked it turns into a quantity stepper: **− · quantity · +**,
+  in the same spot. The quantity is kept per item while the page is open, and stepping back to zero
+  restores the add button.
+- **Place order** — a `ثبت سفارش` button sits right under the cart control; it submits whatever is in the
+  cart (toast for an empty cart, then clears the cart once the order is placed).
 - **Empty state**, **toasts**, reduced-motion support, and keyboard/Escape handling.
 - **Milk & light-coffee palette** — warm cream surfaces, latte-brown accents and golden rating stars.
 - **Responsive** — rows collapse into stacked cards below 900px.
