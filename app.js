@@ -287,7 +287,10 @@
     bar.setAttribute("aria-label", "دسته بندی ها");
     bar.setAttribute("dir", "rtl");
     bar.innerHTML = `
-      <div class="catbar__list">${categoryChipHTML()}</div>
+      <div class="catbar__scrollwrap">
+        <div class="catbar__list">${categoryChipHTML()}</div>
+        <div class="catbar__scrollbar" aria-hidden="true"><div class="catbar__thumb"></div></div>
+      </div>
       <button class="catbar__close" type="button" data-cat-close aria-label="بستن دسته بندی ها" title="بستن">
         ${icon.close}
       </button>`;
@@ -334,16 +337,87 @@
       current.scrollIntoView({ block: "nearest", inline: "nearest" });
     }
 
-    // On a phone the line scrolls sideways: while there is still something
-    // hidden on the left (the end the line runs on towards in RTL), that end
-    // fades out so the extra chips are discoverable.
+    // On a phone (or when there are many categories) the line scrolls
+    // sideways: while there is still something hidden on the left (the end
+    // the line runs on towards in RTL), that end fades out so the extra
+    // chips are discoverable — and a custom scroller sits below the chips,
+    // but only when the line actually overflows.
     const list = bar.querySelector(".catbar__list");
-    const updateFade = () => {
-      const hidden = list.scrollWidth - list.clientWidth;
-      bar.classList.toggle("has-more", hidden > 1 && Math.abs(list.scrollLeft) < hidden - 1);
+    const scrollbar = bar.querySelector(".catbar__scrollbar");
+    const thumb = bar.querySelector(".catbar__thumb");
+
+    // RTL scrollLeft is negative in Chrome/Firefox (0 at the right edge,
+    // growing more negative scrolling left) but positive in older Safari —
+    // detect the sign once so the thumb math works in both.
+    let rtlSign = -1;
+    if (list.scrollWidth > list.clientWidth) {
+      const prev = list.scrollLeft;
+      list.scrollLeft = 1;
+      if (list.scrollLeft === 1) rtlSign = 1;
+      list.scrollLeft = prev;
+    }
+    const getProgress = () => {
+      const max = list.scrollWidth - list.clientWidth;
+      if (max <= 0) return 0;
+      return Math.max(0, Math.min(1, Math.abs(list.scrollLeft) / max));
     };
-    updateFade();
-    list.addEventListener("scroll", updateFade, { passive: true });
+    const setProgress = p => {
+      const max = list.scrollWidth - list.clientWidth;
+      if (max <= 0) return;
+      list.scrollLeft = rtlSign * Math.max(0, Math.min(1, p)) * max;
+    };
+
+    const updateScrollbar = () => {
+      const max = list.scrollWidth - list.clientWidth;
+      const hasOverflow = max > 1;
+      bar.classList.toggle("has-overflow", hasOverflow);
+      bar.classList.toggle("has-more", hasOverflow && Math.abs(list.scrollLeft) < max - 1);
+      if (!hasOverflow) return;
+      const trackW = scrollbar.clientWidth;
+      const thumbW = Math.max(28, Math.round((list.clientWidth / list.scrollWidth) * trackW));
+      thumb.style.width = `${thumbW}px`;
+      const maxOffset = Math.max(0, trackW - thumbW);
+      // RTL: progress 0 pins the thumb to the right edge, 1 to the left.
+      thumb.style.right = `${Math.round(getProgress() * maxOffset)}px`;
+    };
+    updateScrollbar();
+    list.addEventListener("scroll", updateScrollbar, { passive: true });
+    if ("ResizeObserver" in window) {
+      bar._catbarRO = new ResizeObserver(() => updateScrollbar());
+      bar._catbarRO.observe(list);
+    }
+
+    // Drag the thumb (or click the track) to scroll the line.
+    let drag = null;
+    thumb.addEventListener("pointerdown", e => {
+      if (list.scrollWidth - list.clientWidth <= 0) return;
+      e.preventDefault();
+      thumb.setPointerCapture(e.pointerId);
+      drag = { startX: e.clientX, startProgress: getProgress() };
+      list.style.scrollBehavior = "auto";
+      thumb.classList.add("is-dragging");
+    });
+    thumb.addEventListener("pointermove", e => {
+      if (!drag) return;
+      const maxOffset = Math.max(1, scrollbar.clientWidth - thumb.offsetWidth);
+      // RTL: dragging left (dx < 0) moves towards the end → progress grows.
+      setProgress(drag.startProgress - (e.clientX - drag.startX) / maxOffset);
+    });
+    const endDrag = e => {
+      if (!drag) return;
+      drag = null;
+      list.style.scrollBehavior = "";
+      thumb.classList.remove("is-dragging");
+      try { thumb.releasePointerCapture(e.pointerId); } catch { /* already released */ }
+    };
+    thumb.addEventListener("pointerup", endDrag);
+    thumb.addEventListener("pointercancel", endDrag);
+    scrollbar.addEventListener("pointerdown", e => {
+      if (e.target === thumb) return;
+      const rect = scrollbar.getBoundingClientRect();
+      // RTL: right edge is progress 0, left edge is progress 1.
+      setProgress(1 - (e.clientX - rect.left) / rect.width);
+    });
 
     closeBtn.addEventListener("click", () => closeCategoryBar({ restoreFocus: true }));
 
@@ -402,6 +476,8 @@
 
     if (restoreFocus) btn.focus({ preventScroll: true });
     setTimeout(() => {
+      // Stop observing — the bar (and its list) is going away.
+      if (bar._catbarRO) bar._catbarRO.disconnect();
       bar.remove();
       // The button is back for good now — repaint its badge/active state.
       render();
