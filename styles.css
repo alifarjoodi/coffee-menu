@@ -174,8 +174,11 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   gap: 9px;
   margin-left: auto;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
 }
+/* The two round buttons keep their size; when the category bar is open it is
+   the bar that takes (and, if needed, scrolls in) the free room. */
+.toolbar__actions > .fbtn { flex: 0 0 auto; }
 
 .fbtn {
   position: relative;
@@ -194,6 +197,8 @@ a { color: inherit; text-decoration: none; }
   box-shadow: var(--shadow-sm);
   transition: border-color .18s, color .18s, background .18s, transform .12s;
 }
+/* «دسته بندی ها» steps aside (hidden) while its category bar takes the slot. */
+.fbtn[hidden] { display: none; }
 .fbtn:hover { color: var(--text); border-color: #ddc9b5; background: #fffaf4; }
 .fbtn:active { transform: translateY(1px); }
 .fbtn[aria-expanded="true"] { border-color: #d6b795; color: var(--mint); background: #fdf5ec; }
@@ -476,98 +481,74 @@ a { color: inherit; text-decoration: none; }
 @keyframes pop { from { opacity: 0; transform: translateY(-5px) scale(.985); } }
 
 /* ── Category bar («دسته بندی ها») ──────────────────────────
-   One straight line: every category sits side by side on a single row, never
-   stacked. There is no «دسته بندی ها» label inside the bar — the button
-   already says it — so the bar starts straight with the chips. It unfolds
-   right under the button (its right edge lined up with it, since it reads
-   RTL, putting the chips directly under the button) and the notch on its top
-   edge points back at the button. It does not wrap — on a narrow screen the
-   row keeps going and scrolls sideways instead. */
-.popover--cats {
+   The categories open in the button's own place: the button itself is hidden
+   and this bar takes over its slot in the toolbar, on one straight line. It is
+   not a floating panel — it sits in the row like any other toolbar control, so
+   the categories appear exactly where «دسته بندی ها» was. The «×» chip at the
+   far end (it reads RTL) closes the bar and brings the button back.
+   The line never wraps: chips stay side by side and the strip scrolls
+   sideways when there is not enough room. */
+
+.catbar {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  width: max-content;
-  min-width: 0;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: var(--surface);
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--shadow-lg);
-  direction: rtl;
-  overflow: visible;
-  transform-origin: top right;
-  animation: catLineIn .2s var(--ease) both;
-}
-
-/* Notch on the top edge, centred on the button. */
-.popover--cats::after {
-  content: "";
-  position: absolute;
-  top: -5px;
-  left: var(--caret-x, 28px);
-  width: 9px;
-  height: 9px;
-  background: var(--surface);
-  border-top: 1px solid var(--line-strong);
-  border-left: 1px solid var(--line-strong);
-  border-radius: 2px;
-  transform: translateX(-50%) rotate(45deg);
-}
-
-/* The bar stretches out along its own line as it opens. */
-@keyframes catLineIn {
-  from { opacity: 0; transform: translateY(-6px) scaleX(.92); }
-  to   { opacity: 1; transform: translateY(0) scaleX(1); }
-}
-/* Flipped above the button when there is no room below: notch on the bottom. */
-.popover--cats.popover--above {
-  transform-origin: bottom right;
-  animation-name: catLineInUp;
-}
-@keyframes catLineInUp {
-  from { opacity: 0; transform: translateY(6px) scaleX(.92); }
-  to   { opacity: 1; transform: translateY(0) scaleX(1); }
-}
-.popover--cats.popover--above::after {
-  top: auto;
-  bottom: -5px;
-  border-top: 0;
-  border-left: 0;
-  border-bottom: 1px solid var(--line-strong);
-  border-right: 1px solid var(--line-strong);
-}
-.popover--cats.is-closing {
-  animation: catLineOut .15s var(--ease) both;
-  pointer-events: none;
-}
-@keyframes catLineOut {
-  from { opacity: 1; transform: translateY(0) scaleX(1); }
-  to { opacity: 0; transform: translateY(-6px) scaleX(.94); }
-}
-@keyframes catLineOutUp {
-  from { opacity: 1; transform: translateY(0) scaleX(1); }
-  to { opacity: 0; transform: translateY(6px) scaleX(.94); }
-}
-.popover--cats.popover--above.is-closing { animation-name: catLineOutUp; }
-
-/* The row itself: one line, scrolling sideways when it cannot all fit. */
-.cat__list {
-  display: flex;
-  flex-direction: row;
   align-items: center;
   gap: 4px;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  height: 42px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid #d6b795;
+  box-shadow: var(--ring);
+  direction: rtl;
+  transition: opacity .16s var(--ease), transform .19s var(--ease);
+}
+.catbar.is-closing { pointer-events: none; }
+/* The «×» chip — closes the bar, back to the button. */
+.catbar__close {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: var(--text-2);
+  background: transparent;
+  transition: background .14s, color .14s;
+}
+.catbar__close:hover { background: #f3e7d8; color: var(--text); }
+.catbar__close:focus-visible { box-shadow: 0 0 0 2px var(--mint-line); }
+.catbar__close svg { display: block; }
+
+/* The strip itself: one line, scrolling sideways when it cannot all fit.
+   It takes the room the old button left free (the search bar gives way), and
+   only when even that is not enough does the line start to scroll. */
+.catbar__list {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
   min-width: 0;
   overflow-x: auto;
+  scroll-behavior: smooth;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--line-strong) transparent;
+  padding: 2px;
+  border-radius: 999px;
 }
-.cat__list::-webkit-scrollbar { height: 6px; }
-.cat__list::-webkit-scrollbar-track { background: transparent; }
-.cat__list::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 99px; }
+/* More chips than room: the end that has more behind it fades out, so the
+   sideways scroll is discoverable. */
+.catbar.has-more .catbar__list {
+  mask-image: linear-gradient(to left, #000 calc(100% - 26px), transparent);
+  -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 26px), transparent);
+}
+.catbar__list::-webkit-scrollbar { height: 5px; }
+.catbar__list::-webkit-scrollbar-track { background: transparent; }
+.catbar__list::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 99px; }
 
 /* One chip per category, all of them on the same line. */
 .cat__opt {
@@ -608,12 +589,12 @@ a { color: inherit; text-decoration: none; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.popover--cats.is-ready .cat__opt[aria-selected="true"] {
+.catbar.is-ready .cat__opt[aria-pressed="true"] {
   background: var(--mint-soft);
   color: var(--text);
   font-weight: 650;
 }
-.popover--cats.is-ready .cat__opt[aria-selected="true"] .cat__check {
+.catbar.is-ready .cat__opt[aria-pressed="true"] .cat__check {
   width: 14px;
   margin-inline-end: 6px;
   opacity: 1;
@@ -1233,8 +1214,8 @@ a { color: inherit; text-decoration: none; }
   .fbtn { flex: 0 0 auto; justify-content: center; padding: 0 13px; font-size: 12.5px; }
   .fbtn__label { overflow: hidden; text-overflow: ellipsis; }
   /* The bar keeps its single line on phones: the chips get the whole width
-     and the line scrolls sideways. */
-  .popover--cats { gap: 8px; padding: 5px 8px; }
+     of the row and the line scrolls sideways. */
+  .catbar { flex: 1 1 auto; }
   .cat__opt { min-height: 30px; padding: 4px 11px; font-size: 12px; }
   .table-footer { justify-content: center; }
   .footer__count { width: 100%; text-align: center; }
