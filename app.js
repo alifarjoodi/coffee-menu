@@ -353,9 +353,10 @@
   }
 
   /* Drawer layout: product image on the top right (with a little breathing room
-     from the top edge), the name to its left vertically centred on the image,
-     the price right below the image, the description underneath, and the
-     add-to-cart control pinned to the bottom. */
+     from the top edge), the name glued to the top of the image, the price —
+     without its box — 10px in from the drawer's left edge, the add-to-cart
+     control straight underneath, the «ثبت سفارش» button below it, and the
+     description last, further down the panel. */
   function drawerHTML(item) {
     return `
       <div class="d-head">
@@ -365,21 +366,24 @@
       <div class="d-top">
         <div class="d-figure">
           <div class="d-thumb" style="background:linear-gradient(160deg,#fffdf8,${item.tint})" aria-hidden="true">${item.emoji}</div>
-          <div class="d-price">
-            <span class="d-price__label">قیمت</span>
-            <span class="d-price__value">${money(item.price)}</span>
-          </div>
         </div>
 
         <div class="d-summary">
           <h2 class="d-name">${esc(item.name)}</h2>
           <span class="d-cat">${esc(item.category)}</span>
+          <div class="d-price">
+            <span class="d-price__label">قیمت</span>
+            <span class="d-price__value">${money(item.price)}</span>
+          </div>
         </div>
       </div>
 
-      <p class="d-desc">${esc(item.desc)}</p>
+      <div class="d-cta">
+        <div class="d-actions" id="cartActions">${cartControlHTML(item)}</div>
+        <button class="d-submit" type="button" id="submitOrder">ثبت سفارش</button>
+      </div>
 
-      <div class="d-actions" id="cartActions">${cartControlHTML(item)}</div>`;
+      <p class="d-desc">${esc(item.desc)}</p>`;
   }
 
   /* Re-render only the bottom control, so the stepper appears/disappears in place. */
@@ -415,8 +419,25 @@
     $("#drawerClose").addEventListener("click", closeDrawer);
   }
 
+  /* «ثبت سفارش» — places the order with whatever is in the cart, then resets it. */
+  function submitOrder() {
+    const total = [...cart.values()].reduce((sum, n) => sum + n, 0);
+    if (!total) {
+      toast("سبد خرید خالی است");
+      return;
+    }
+    cart.clear();
+    refreshCart();
+    toast(total === 1 ? "سفارش ثبت شد" : `سفارش با ${total} آیتم ثبت شد`);
+  }
+
   /* Cart interactions inside the drawer (delegated: innerHTML is re-rendered). */
   drawerInner.addEventListener("click", e => {
+    if (e.target.closest("#submitOrder")) {
+      submitOrder();
+      return;
+    }
+
     const add = e.target.closest("[data-cart-add]");
     if (add) {
       cart.set(add.dataset.cartAdd, 1);

@@ -553,7 +553,9 @@ a { color: inherit; text-decoration: none; }
 }
 .drawer.is-open { transform: none; }
 .drawer__inner {
-  padding: 18px 24px 26px;
+  --pad-x: 24px;       /* horizontal inset, reused to place the price */
+  --price-left: 10px;  /* price sits this far from the drawer’s left edge */
+  padding: 18px var(--pad-x) 26px;
   min-height: 100%;
   display: flex;
   flex-direction: column;
@@ -573,13 +575,13 @@ a { color: inherit; text-decoration: none; }
 }
 .d-close:hover { background: #eddcc8; color: #4a2f1b; border-color: #dcc3a6; }
 
-/* top block: figure (image + price) on the right, name to its left */
+/* top block: image on the right, name + category + price to its left */
 .d-top {
   --thumb: 122px;
   display: flex;
   flex-direction: row-reverse;
   align-items: flex-start;
-  gap: 18px;
+  gap: 14px;
   margin-top: 6px;
 }
 
@@ -587,8 +589,7 @@ a { color: inherit; text-decoration: none; }
   flex: none;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 10px;
+  gap: 0;
   width: var(--thumb);
 }
 
@@ -607,20 +608,21 @@ a { color: inherit; text-decoration: none; }
   box-shadow: inset 0 1px 0 #fff, 0 16px 28px -20px rgba(120, 86, 55, .5);
 }
 
-/* price, directly beneath the image */
+/* price — no box, flush to the left, 10px in from the drawer edge */
 .d-price {
-  width: 100%;
+  align-self: flex-start;
+  margin-left: calc(var(--price-left) - var(--pad-x));
+  margin-top: 6px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
-  text-align: center;
-  padding: 9px 6px 10px;
-  border-radius: 14px;
-  background: linear-gradient(165deg, #fffdfa 0%, #f7ecdd 55%, #efdfcc 100%);
-  border: 1px solid #e6d1b8;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 10px 20px -16px rgba(110, 72, 40, .5);
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  box-shadow: none;
 }
 .d-price__label {
   font-size: 9.5px;
@@ -639,16 +641,16 @@ a { color: inherit; text-decoration: none; }
   white-space: nowrap;
 }
 
-/* name sits beside the image, vertically centred on the image itself */
+/* name is glued to the top of the image; category and price stack under it */
 .d-summary {
   flex: 1 1 auto;
   min-width: 0;
-  min-height: var(--thumb);
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
   gap: 5px;
+  padding-top: 0;
   text-align: left;
 }
 .d-name {
@@ -677,20 +679,28 @@ a { color: inherit; text-decoration: none; }
   text-overflow: ellipsis;
 }
 
+/* description now sits under the actions, further down the drawer */
 .d-desc {
   margin: 0;
   font-size: 13px;
   line-height: 1.7;
   color: var(--text-2);
-  padding-bottom: 20px;
-  border-bottom: 1px solid #eddcc9;
+  padding-top: 14px;
+  border-top: 1px solid #eddcc9;
   overflow-wrap: anywhere;
 }
 
-/* bottom control — milky + coffee palette */
+/* action stack — add-to-cart first, then «ثبت سفارش» */
+.d-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* cart control — milky + coffee palette, no longer pinned to the bottom */
 .d-actions {
-  margin-top: auto;
-  padding-top: 6px;
+  margin-top: 0;
+  padding-top: 0;
 }
 .d-actions.is-swap > * { animation: cartPop .26s var(--ease) both; }
 @keyframes cartPop {
@@ -720,6 +730,29 @@ a { color: inherit; text-decoration: none; }
 }
 .d-add:hover { filter: brightness(1.08); }
 .d-add:active { transform: translateY(1px); }
+
+/* «ثبت سفارش» — secondary action under the cart control */
+.d-submit {
+  width: 100%;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -.01em;
+  color: #5b3c23;
+  background: linear-gradient(180deg, #fffdf8 0%, #f6ebdb 100%);
+  border: 1px solid #e2cbb2;
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 14px 28px -20px rgba(110, 72, 40, .5);
+  transition: background .16s, border-color .16s, transform .14s, box-shadow .16s;
+}
+.d-submit:hover { background: #f8eddd; border-color: #d8bda0; }
+.d-submit:active { transform: translateY(1px); }
 
 /* state 2: minus · quantity · plus */
 .d-qty {
@@ -847,11 +880,11 @@ a { color: inherit; text-decoration: none; }
   .card { border-radius: 18px; }
 
   /* drawer: keep the image · name · price trio comfortable on phones */
-  .drawer__inner { padding: 16px 18px 22px; gap: 16px; }
+  .drawer__inner { --pad-x: 18px; padding: 16px var(--pad-x) 22px; gap: 16px; }
   .d-top { --thumb: 104px; gap: 14px; }
   .d-thumb { font-size: 46px; border-radius: 22px; }
   .d-name { font-size: 16.5px; }
-  .d-price { padding: 8px 5px 9px; border-radius: 12px; }
+  .d-price { margin-top: 4px; }
   .d-price__value { font-size: 22px; }
 }
 
