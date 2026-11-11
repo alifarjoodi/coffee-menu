@@ -475,62 +475,147 @@ a { color: inherit; text-decoration: none; }
 }
 @keyframes pop { from { opacity: 0; transform: translateY(-5px) scale(.985); } }
 
-/* Horizontal category bar opening below its (left-edge) anchor */
-.popover--bar {
+/* ── Category panel («دسته بندی ها») ────────────────────────
+   A stacked list that slides out from the side of the button:
+   flush to its left edge, top aligned with the button, with a small
+   notch on that edge pointing back at the button. */
+.popover--cats {
   display: flex;
-  align-items: center;
-  gap: 4px;
+  flex-direction: column;
+  width: 252px;
   min-width: 0;
-  width: max-content;
-  max-width: calc(100vw - 20px);
-  height: 42px;
-  padding: 4px;
-  border-radius: 999px;
+  padding: 7px;
+  border-radius: 16px;
   background: var(--surface);
   border: 1px solid var(--line-strong);
   box-shadow: var(--shadow-lg);
   direction: rtl;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
+  overflow: hidden;
   transform-origin: right center;
-  animation: popLeft .18s var(--ease) both;
-}
-.popover--bar::-webkit-scrollbar { display: none; }
-.popover--bar.popover--bar-below {
-  transform-origin: top center;
-  animation: pop .16s var(--ease) both;
-}
-@keyframes popLeft {
-  from { opacity: 0; transform: translateX(12px) scaleX(.92); }
-  to { opacity: 1; transform: translateX(0) scaleX(1); }
+  animation: catOut .2s var(--ease) both;
 }
 
-.bar__opt {
-  flex: 0 0 auto;
-  display: inline-flex;
+/* Notch on the button side, centred on the button. */
+.popover--cats::after {
+  content: "";
+  position: absolute;
+  top: var(--caret-y, 21px);
+  right: -5px;
+  width: 9px;
+  height: 9px;
+  background: var(--surface);
+  border-top: 1px solid var(--line-strong);
+  border-right: 1px solid var(--line-strong);
+  border-radius: 2px;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+/* Sideways entrance — the panel slides out from the button on its right and
+   unfolds horizontally, so it reads as coming out of the button's side. */
+@keyframes catOut {
+  from { opacity: 0; transform: translateX(18px) scaleX(.9); }
+  to   { opacity: 1; transform: translateX(0) scaleX(1); }
+}
+@keyframes catOutDown {
+  from { opacity: 0; transform: translateY(-6px) scaleY(.94); }
+  to   { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+/* Same stacked list, tucked under the button on very narrow screens. */
+.popover--cats.popover--below {
+  transform-origin: top right;
+  animation: catOutDown .18s var(--ease) both;
+}
+/* Point the notch at the button's own centre (its right offset inline). */
+.popover--cats.popover--below::after {
+  top: -5px;
+  left: var(--caret-x, auto);
+  right: auto;
+  transform: translateX(-50%) rotate(45deg);
+  box-shadow: -1px -1px 0 var(--line-strong);
+}
+.popover--cats.is-closing {
+  animation: catIn .15s var(--ease) both;
+  pointer-events: none;
+}
+@keyframes catIn {
+  from { opacity: 1; transform: translateX(0) scaleX(1); }
+  to { opacity: 0; transform: translateX(16px) scaleX(.92); }
+}
+@keyframes catInDown {
+  from { opacity: 1; transform: translateY(0) scaleY(1); }
+  to { opacity: 0; transform: translateY(-6px) scaleY(.95); }
+}
+.popover--cats.popover--below.is-closing { animation-name: catInDown; }
+
+.cat__head {
+  flex: none;
+  padding: 7px 10px 7px;
+  margin-bottom: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--line);
+}
+/* Only the rows scroll when the list is taller than the viewport. */
+.cat__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+.cat__list::-webkit-scrollbar { width: 6px; }
+.cat__list::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 99px; }
+
+/* Rows read top-to-bottom, one category per line. */
+.cat__opt {
+  flex: none;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  height: 32px;
-  padding: 0 13px;
-  border-radius: 999px;
-  font-size: 12.75px;
+  gap: 9px;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  font-size: 13px;
   font-weight: 500;
+  line-height: 1.35;
   color: var(--text-2);
+  text-align: right;
   white-space: nowrap;
-  border: 1px solid transparent;
-  transition: background .14s, color .14s, border-color .14s, box-shadow .14s;
+  transition: background .14s, color .14s;
 }
-.bar__opt:hover { background: #fdf5ea; color: var(--text); }
-.bar__opt:focus-visible {
-  border-radius: 999px;
-  box-shadow: inset 0 0 0 2px rgba(169, 118, 75, .45);
+.cat__opt:hover { background: #fdf5ea; color: var(--text); }
+.cat__opt:focus-visible { box-shadow: inset 0 0 0 2px rgba(169, 118, 75, .45); border-radius: 10px; }
+.cat__check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  color: var(--mint);
+  opacity: 0;
+  transform: scale(.6);
+  transition: opacity .16s var(--ease), transform .16s var(--ease);
 }
-.bar__opt[aria-selected="true"] {
-  background: var(--mint);
-  color: #fff8f0;
-  font-weight: 600;
-  box-shadow: 0 2px 8px -2px rgba(169, 118, 75, .45);
+.cat__check svg { display: block; }
+.cat__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.popover--cats.is-ready .cat__opt[aria-selected="true"] {
+  background: var(--mint-soft);
+  color: var(--text);
+  font-weight: 650;
+}
+.popover--cats.is-ready .cat__opt[aria-selected="true"] .cat__check {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .popover__title {
