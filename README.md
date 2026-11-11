@@ -8,7 +8,7 @@ plain HTML, CSS and JavaScript (no frameworks, no build step).
 | File | Purpose |
 |------|---------|
 | `index.html` | Markup: breadcrumb bar, search + filter toolbar, table, result count, drawer |
-| `styles.css` | All styling: design tokens, table, chips, popovers, drawer, responsive rules |
+| `styles.css` | All styling: design tokens, table, chips, category panel, drawer, responsive rules |
 | `app.js` | Data + interactivity: search, filters, sorting, read-only details drawer |
 
 ## Run
@@ -26,9 +26,11 @@ python3 -m http.server 8000
 - **Search** by item name, category, item ID or code — debounced, keyboard shortcut `⌘K` / `Ctrl+K` / `/`.
 - **Toolbar order**: search on the left, then a right-aligned action pair — **`دسته بندی ها`** first and
   **`سبد خرید`** last, so the cart button sits at the far right edge.
-- **Categories bar** (`دسته بندی ها`): floating horizontal category strip (`همه`, `Coffee / Chocolate`, `Coffee / Cappuccino`,
-  `Coffee Latte`, `Coffee / Espresso`) that opens below the button and lines up with its right edge on click;
-  on narrower screens it shifts just enough to stay inside the page column.
+- **Categories menu** (`دسته بندی ها`): a stacked, one-category-per-line list (`همه`, `Coffee / Chocolate`,
+  `Coffee / Cappuccino`, `Coffee Latte`, `Coffee / Espresso`) that slides out from the **side** of the button —
+  flush to its left edge, top aligned with it, with a check mark on the active category. Clicking a row filters
+  the table straight away; clicking outside, `Esc`, or the button again closes it. On phones, where there is no
+  room beside the button, the same vertical list drops just under it.
 - **Sortable columns** — click Item Name, Price or Score & Rating to toggle ascending / descending.
 - **Read-only user view** — menu items are frozen; no inline status editing, duplication, or modification controls.
 - **Single continuous list** — all matching items are shown together without pagination.

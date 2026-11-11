@@ -165,65 +165,90 @@
   let openPopover = null;
   let popAnchor = null;
 
-  function closePopover({ restoreFocus = false } = {}) {
+  function closePopover({ restoreFocus = false, animate = true } = {}) {
     const anchor = popAnchor;
-    if (openPopover) openPopover.remove();
-    if (anchor) anchor.setAttribute("aria-expanded", "false");
+    const el = openPopover;
     openPopover = null;
     popAnchor = null;
+    if (anchor) anchor.setAttribute("aria-expanded", "false");
     if (restoreFocus && anchor) anchor.focus({ preventScroll: true });
+    if (!el) return;
+    if (!animate) { el.remove(); return; }
+    // Short exit animation, then take the panel out of the DOM.
+    el.classList.add("is-closing");
+    setTimeout(() => el.remove(), 150);
   }
 
-  function showPopover(anchor, html, { align = "start", placement = "bottom", className = "", width, within = null } = {}) {
+  function showPopover(anchor, html, { align = "start", placement = "bottom", className = "", width, leading = "", label = "" } = {}) {
     const sameAnchor = popAnchor === anchor && openPopover;
-    closePopover();
+    closePopover({ animate: !sameAnchor });
     if (sameAnchor) return null;
+
+    // Drop any panel still playing its exit animation, so a quick re-open never
+    // leaves two of them stacked.
+    host.querySelectorAll(".is-closing").forEach(n => n.remove());
 
     const el = document.createElement("div");
     el.className = className ? `popover ${className}` : "popover";
     el.setAttribute("role", "menu");
-    el.innerHTML = html;
+    if (label) el.setAttribute("aria-label", label);
+    el.innerHTML = leading + html;
     if (width) el.style.minWidth = width;
+    // Measure at natural size first (CSS animates opacity/transform only, so the
+    // offsetWidth here is final), then fit it into the viewport and place it.
+    el.style.visibility = "hidden";
     host.appendChild(el);
 
     const r = anchor.getBoundingClientRect();
     const edgePad = 10;
+    const gap = 8;
 
     if (placement === "left") {
-      const gap = 8;
-      const availableLeft = r.left - gap - edgePad;
-      if (availableLeft >= 140) {
-        el.style.maxWidth = `${Math.floor(availableLeft)}px`;
+      /* Open a vertical panel beside the button: flush to its left edge with a
+         small gap, its top lined up with the button. When there is not enough
+         room over there (phones), tuck the same stacked panel under it so the
+         rows keep reading top-to-bottom. */
+      const roomLeft = r.left - gap - edgePad;
+      el.style.maxHeight = `${Math.max(120, window.innerHeight - edgePad * 2)}px`;
+
+      if (roomLeft >= 210) {
+        el.style.maxWidth = `${Math.floor(roomLeft)}px`;
         const w = el.offsetWidth;
         const h = el.offsetHeight;
-        const left = Math.max(edgePad, r.left - gap - w);
-        const top = Math.max(edgePad, r.top + (r.height - h) / 2);
-        el.style.left = `${left + window.scrollX}px`;
-        el.style.top = `${top + window.scrollY}px`;
+        const top = Math.max(edgePad, Math.min(r.top - 6, window.innerHeight - edgePad - h));
+        el.style.left = `${Math.round(r.left - gap - w + window.scrollX)}px`;
+        el.style.top = `${Math.round(top + window.scrollY)}px`;
+        // Point the little notch at the middle of the button.
+        el.style.setProperty("--caret-y", `${Math.round(r.top + r.height / 2 - top)}px`);
       } else {
-        el.classList.add("popover--bar-below");
-        el.style.maxWidth = `${Math.max(120, window.innerWidth - edgePad * 2)}px`;
+        // Phones: no room beside the button, so the very same stacked list sits
+        // under it, right edge lined up with the button.
+        el.classList.add("popover--below");
+        el.style.maxWidth = `${Math.max(160, window.innerWidth - edgePad * 2)}px`;
         const w = el.offsetWidth;
         const left = Math.max(edgePad, Math.min(r.right - w, window.innerWidth - w - edgePad));
-        el.style.left = `${left + window.scrollX}px`;
-        el.style.top = `${r.bottom + window.scrollY + 7}px`;
+        const roomBelow = window.innerHeight - r.bottom - gap - edgePad;
+        if (roomBelow >= 180) {
+          el.style.maxHeight = `${roomBelow}px`;
+          el.style.top = `${Math.round(r.bottom + gap + window.scrollY)}px`;
+        } else {
+          // Flip above the button when the bottom is cramped.
+          el.style.maxHeight = `${Math.max(120, r.top - gap - edgePad)}px`;
+          el.style.top = `${Math.round(Math.max(edgePad, r.top - gap - el.offsetHeight) + window.scrollY)}px`;
+        }
+        el.style.left = `${Math.round(left + window.scrollX)}px`;
+        const caretX = (r.left + r.width / 2) - left;
+        el.style.setProperty("--caret-x", `${Math.round(Math.max(18, Math.min(caretX, Math.min(w, window.innerWidth - left) - 18)))}px`);
       }
     } else {
       const w = el.offsetWidth;
       let left = align === "end" ? r.right - w : r.left;
-      // Keep the popover inside `within` (e.g. the toolbar's column) when it fits
-      // there; when it is wider than that, center it so it overhangs evenly.
-      const box = within ? within.getBoundingClientRect() : null;
-      if (box) {
-        left = w <= box.width
-          ? Math.max(box.left, Math.min(left, box.right - w))
-          : box.left - (w - box.width) / 2;
-      }
       left = Math.max(edgePad, Math.min(left, window.innerWidth - w - edgePad));
       el.style.left = `${left + window.scrollX}px`;
       el.style.top = `${r.bottom + window.scrollY + 7}px`;
     }
 
+    el.style.visibility = "";
     anchor.setAttribute("aria-expanded", "true");
     openPopover = el;
     popAnchor = anchor;
@@ -242,22 +267,28 @@
   window.addEventListener("resize", () => closePopover());
 
   /* ── Toolbar menus ────────────────────────────────────── */
+  /* «دسته بندی ها» — a stacked (linear) list that slides out from the side of
+     the button: flush to its left edge, top aligned with the button. */
   $("#moreFilters").addEventListener("click", e => {
     e.stopPropagation();
-    const html = CATEGORIES.map(c => {
+    const rows = CATEGORIES.map(c => {
       const active = state.category === c.id;
-      return `<button class="bar__opt" type="button" role="menuitemradio" data-filter-category="${esc(c.id)}" dir="${c.dir}" aria-checked="${active}" aria-selected="${active}">${esc(c.label)}</button>`;
+      return `<button class="cat__opt" type="button" role="menuitemradio" data-filter-category="${esc(c.id)}" aria-checked="${active}" aria-selected="${active}">
+        <span class="cat__check" aria-hidden="true">${icon.check}</span>
+        <span class="cat__label">${esc(c.label)}</span>
+      </button>`;
     }).join("");
 
-    // The button sits just left of «سبد خرید» in the right-aligned action pair, so
-    // the bar opens below it and lines up with its right edge. Where it cannot
-    // reach that far left (tablet widths), it stays inside the toolbar's column.
-    const el = showPopover(e.currentTarget, html, {
-      align: "end",
-      within: e.currentTarget.closest(".toolbar"),
-      className: "popover--bar popover--bar-below"
+    const el = showPopover(e.currentTarget, `<div class="cat__list">${rows}</div>`, {
+      placement: "left",
+      className: "popover--cats",
+      label: "دسته بندی ها",
+      leading: `<div class="cat__head" role="presentation">دسته بندی ها</div>`
     });
     if (!el) return;
+
+    // Highlight pops into place once the panel has landed.
+    requestAnimationFrame(() => el.classList.add("is-ready"));
 
     const opts = [...el.querySelectorAll("[data-filter-category]")];
     if (e.detail === 0) {
@@ -272,10 +303,10 @@
         render();
       });
       b.addEventListener("keydown", ev => {
-        if (ev.key === "ArrowLeft") {
+        if (ev.key === "ArrowDown" || ev.key === "ArrowLeft") {
           ev.preventDefault();
           opts[(idx + 1) % opts.length].focus();
-        } else if (ev.key === "ArrowRight") {
+        } else if (ev.key === "ArrowUp" || ev.key === "ArrowRight") {
           ev.preventDefault();
           opts[(idx - 1 + opts.length) % opts.length].focus();
         } else if (ev.key === "Home") {
