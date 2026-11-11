@@ -352,12 +352,9 @@
       </div>`;
   }
 
-  /* Drawer layout: product image on the top right (with a little breathing room
-     from the top edge), the name glued to the top of the image, the price —
-     without its “قیمت” label and without its box — sitting a little lower,
-     lined up on the left edge with the item name, the description below it,
-     and the «افزودن به سبد خرید» + «ثبت سفارش» stack glued to the bottom of
-     the panel, in that order. */
+  /* Drawer layout: a full-width product image, then the title and price below
+     it, the description after them, and the «افزودن به سبد خرید» + «ثبت سفارش»
+     stack glued to the bottom of the panel, in that order. */
   function drawerHTML(item) {
     return `
       <div class="d-head">
