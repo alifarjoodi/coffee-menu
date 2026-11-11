@@ -496,8 +496,9 @@ a { color: inherit; text-decoration: none; }
   flex: 0 1 auto;
   min-width: 0;
   max-width: 100%;
-  height: 42px;
-  padding: 0 5px;
+  min-height: 42px;
+  height: auto;
+  padding: 3px 5px;
   border-radius: 999px;
   background: var(--surface);
   border: 1px solid #d6b795;
@@ -524,7 +525,17 @@ a { color: inherit; text-decoration: none; }
 
 /* The strip itself: one line, scrolling sideways when it cannot all fit.
    It takes the room the old button left free (the search bar gives way), and
-   only when even that is not enough does the line start to scroll. */
+   only when even that is not enough does the line start to scroll.
+   The list and its scroller below it share one column, so the scroller
+   always sits directly under the chips. */
+.catbar__scrollwrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
 .catbar__list {
   display: flex;
   flex-direction: row;
@@ -535,8 +546,10 @@ a { color: inherit; text-decoration: none; }
   scroll-behavior: smooth;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--line-strong) transparent;
+  /* The native scrollbar is hidden — the custom scroller below the chips
+     (`.catbar__scrollbar`) is the visible one. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   padding: 2px;
   border-radius: 999px;
 }
@@ -546,9 +559,37 @@ a { color: inherit; text-decoration: none; }
   mask-image: linear-gradient(to left, #000 calc(100% - 26px), transparent);
   -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 26px), transparent);
 }
-.catbar__list::-webkit-scrollbar { height: 5px; }
-.catbar__list::-webkit-scrollbar-track { background: transparent; }
-.catbar__list::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 99px; }
+.catbar__list::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+/* Custom scroller below the chips — only when the line overflows (many
+   categories / narrow screen). The track is a slim latte groove and the
+   thumb is sized by how much of the line is visible. */
+.catbar__scrollbar {
+  display: none;
+  flex: none;
+  height: 6px;
+  border-radius: 99px;
+  background: #f3e7d8;
+  position: relative;
+  cursor: pointer;
+  touch-action: none;
+}
+.catbar.has-overflow .catbar__scrollbar { display: block; }
+.catbar__thumb {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  min-width: 28px;
+  border-radius: 99px;
+  background: #c9a87c;
+  cursor: grab;
+  touch-action: none;
+  transition: background .14s;
+}
+.catbar__thumb:hover { background: #bd9264; }
+.catbar__thumb:active,
+.catbar__thumb.is-dragging { background: #b98f5f; cursor: grabbing; }
 
 /* One chip per category, all of them on the same line. */
 .cat__opt {
@@ -1214,9 +1255,12 @@ a { color: inherit; text-decoration: none; }
   .fbtn { flex: 0 0 auto; justify-content: center; padding: 0 13px; font-size: 12.5px; }
   .fbtn__label { overflow: hidden; text-overflow: ellipsis; }
   /* The bar keeps its single line on phones: the chips get the whole width
-     of the row and the line scrolls sideways. */
-  .catbar { flex: 1 1 auto; }
+     of the row and the line scrolls sideways. When the line overflows, the
+     scroller sits below the chips — reserve its room in the bar's height so
+     it appearing never jumps the toolbar. */
+  .catbar { flex: 1 1 auto; min-height: 52px; }
   .cat__opt { min-height: 30px; padding: 4px 11px; font-size: 12px; }
+  .catbar__scrollbar { height: 5px; margin: 0 8px; }
   .table-footer { justify-content: center; }
   .footer__count { width: 100%; text-align: center; }
   .card { border-radius: 18px; }

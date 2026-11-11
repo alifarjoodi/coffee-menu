@@ -33,8 +33,9 @@ python3 -m http.server 8000
   spot; the active chip carries the check mark and a soft latte fill. The `×` chip at the far end (it reads RTL)
   closes the bar and puts the button back in the very same slot; clicking outside, `Esc`, or picking a category
   does the same. Clicking a chip filters the table straight away. The line never wraps: when the row is narrower
-  than the line, the chips scroll sideways inside the bar. `←`/`→` walk the line (RTL-aware), `Home`/`End` jump
-  to its ends.
+  than the line, the chips scroll sideways inside the bar. When the line overflows (many categories / narrow
+  screen), a slim custom scroller appears **below the chips** — drag its thumb or click the track to move along
+  the line. `←`/`→` walk the line (RTL-aware), `Home`/`End` jump to its ends.
 - **Sortable columns** — click Item Name, Price or Score & Rating to toggle ascending / descending.
 - **Read-only user view** — menu items are frozen; no inline status editing, duplication, or modification controls.
 - **Single continuous list** — all matching items are shown together without pagination.
