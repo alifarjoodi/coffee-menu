@@ -26,11 +26,13 @@ python3 -m http.server 8000
 - **Search** by item name, category, item ID or code — debounced, keyboard shortcut `⌘K` / `Ctrl+K` / `/`.
 - **Toolbar order**: search on the left, then a right-aligned action pair — **`دسته بندی ها`** first and
   **`سبد خرید`** last, so the cart button sits at the far right edge.
-- **Categories menu** (`دسته بندی ها`): a stacked, one-category-per-line list (`همه`, `Coffee / Chocolate`,
-  `Coffee / Cappuccino`, `Coffee Latte`, `Coffee / Espresso`) that slides out from the **side** of the button —
-  flush to its left edge, top aligned with it, with a check mark on the active category. Clicking a row filters
-  the table straight away; clicking outside, `Esc`, or the button again closes it. On phones, where there is no
-  room beside the button, the same vertical list drops just under it.
+- **Categories bar** (`دسته بندی ها`): opens as **one straight line** — a pill-shaped bar under the button with
+  `همه`, `Coffee / Chocolate`, `Coffee / Cappuccino`, `Coffee Latte` and `Coffee / Espresso` laid out **side by
+  side on a single row** (no stacked list). It unfolds right below the button, its right edge lined up with it and a
+  notch pointing back at it; the active chip carries the check mark and a soft latte fill. Clicking a chip filters
+  the table straight away; clicking outside, `Esc`, or the button again closes it. The row never wraps: when the
+  screen is narrower than the line (phones), the bar is capped to the viewport, its label steps out and the chips
+  scroll sideways on the same line. `←`/`→` walk the line (RTL-aware), `Home`/`End` jump to its ends.
 - **Sortable columns** — click Item Name, Price or Score & Rating to toggle ascending / descending.
 - **Read-only user view** — menu items are frozen; no inline status editing, duplication, or modification controls.
 - **Single continuous list** — all matching items are shown together without pagination.

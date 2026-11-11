@@ -475,132 +475,141 @@ a { color: inherit; text-decoration: none; }
 }
 @keyframes pop { from { opacity: 0; transform: translateY(-5px) scale(.985); } }
 
-/* ── Category panel («دسته بندی ها») ────────────────────────
-   A stacked list that slides out from the side of the button:
-   flush to its left edge, top aligned with the button, with a small
-   notch on that edge pointing back at the button. */
+/* ── Category bar («دسته بندی ها») ──────────────────────────
+   One straight line: the label and every category sit side by side on a
+   single row, never stacked. The bar unfolds right under the button (its
+   right edge lined up with it, since it reads RTL) and the notch on its top
+   edge points back at the button. It does not wrap — on a narrow screen the
+   row keeps going and scrolls sideways instead. */
 .popover--cats {
   display: flex;
-  flex-direction: column;
-  width: 252px;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  width: max-content;
   min-width: 0;
-  padding: 7px;
-  border-radius: 16px;
+  padding: 6px 10px;
+  border-radius: 999px;
   background: var(--surface);
   border: 1px solid var(--line-strong);
   box-shadow: var(--shadow-lg);
   direction: rtl;
-  overflow: hidden;
-  transform-origin: right center;
-  animation: catOut .2s var(--ease) both;
+  overflow: visible;
+  transform-origin: top right;
+  animation: catLineIn .2s var(--ease) both;
 }
 
-/* Notch on the button side, centred on the button. */
+/* Notch on the top edge, centred on the button. */
 .popover--cats::after {
   content: "";
   position: absolute;
-  top: var(--caret-y, 21px);
-  right: -5px;
+  top: -5px;
+  left: var(--caret-x, 28px);
   width: 9px;
   height: 9px;
   background: var(--surface);
   border-top: 1px solid var(--line-strong);
-  border-right: 1px solid var(--line-strong);
+  border-left: 1px solid var(--line-strong);
   border-radius: 2px;
-  transform: translateY(-50%) rotate(45deg);
+  transform: translateX(-50%) rotate(45deg);
 }
 
-/* Sideways entrance — the panel slides out from the button on its right and
-   unfolds horizontally, so it reads as coming out of the button's side. */
-@keyframes catOut {
-  from { opacity: 0; transform: translateX(18px) scaleX(.9); }
-  to   { opacity: 1; transform: translateX(0) scaleX(1); }
+/* The bar stretches out along its own line as it opens. */
+@keyframes catLineIn {
+  from { opacity: 0; transform: translateY(-6px) scaleX(.92); }
+  to   { opacity: 1; transform: translateY(0) scaleX(1); }
 }
-@keyframes catOutDown {
-  from { opacity: 0; transform: translateY(-6px) scaleY(.94); }
-  to   { opacity: 1; transform: translateY(0) scaleY(1); }
+/* Flipped above the button when there is no room below: notch on the bottom. */
+.popover--cats.popover--above {
+  transform-origin: bottom right;
+  animation-name: catLineInUp;
 }
-/* Same stacked list, tucked under the button on very narrow screens. */
-.popover--cats.popover--below {
-  transform-origin: top right;
-  animation: catOutDown .18s var(--ease) both;
+@keyframes catLineInUp {
+  from { opacity: 0; transform: translateY(6px) scaleX(.92); }
+  to   { opacity: 1; transform: translateY(0) scaleX(1); }
 }
-/* Point the notch at the button's own centre (its right offset inline). */
-.popover--cats.popover--below::after {
-  top: -5px;
-  left: var(--caret-x, auto);
-  right: auto;
-  transform: translateX(-50%) rotate(45deg);
-  box-shadow: -1px -1px 0 var(--line-strong);
+.popover--cats.popover--above::after {
+  top: auto;
+  bottom: -5px;
+  border-top: 0;
+  border-left: 0;
+  border-bottom: 1px solid var(--line-strong);
+  border-right: 1px solid var(--line-strong);
 }
 .popover--cats.is-closing {
-  animation: catIn .15s var(--ease) both;
+  animation: catLineOut .15s var(--ease) both;
   pointer-events: none;
 }
-@keyframes catIn {
-  from { opacity: 1; transform: translateX(0) scaleX(1); }
-  to { opacity: 0; transform: translateX(16px) scaleX(.92); }
+@keyframes catLineOut {
+  from { opacity: 1; transform: translateY(0) scaleX(1); }
+  to { opacity: 0; transform: translateY(-6px) scaleX(.94); }
 }
-@keyframes catInDown {
-  from { opacity: 1; transform: translateY(0) scaleY(1); }
-  to { opacity: 0; transform: translateY(-6px) scaleY(.95); }
+@keyframes catLineOutUp {
+  from { opacity: 1; transform: translateY(0) scaleX(1); }
+  to { opacity: 0; transform: translateY(6px) scaleX(.94); }
 }
-.popover--cats.popover--below.is-closing { animation-name: catInDown; }
+.popover--cats.popover--above.is-closing { animation-name: catLineOutUp; }
 
+/* The label leads the line, then a hairline divider, then the chips. */
 .cat__head {
   flex: none;
-  padding: 7px 10px 7px;
-  margin-bottom: 4px;
+  padding-inline-end: 10px;
   font-size: 10.5px;
   font-weight: 700;
   letter-spacing: .06em;
   color: var(--text-3);
-  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  border-inline-end: 1px solid var(--line);
 }
-/* Only the rows scroll when the list is taller than the viewport. */
+/* The row itself: one line, scrolling sideways when it cannot all fit. */
 .cat__list {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--line-strong) transparent;
 }
-.cat__list::-webkit-scrollbar { width: 6px; }
+.cat__list::-webkit-scrollbar { height: 6px; }
+.cat__list::-webkit-scrollbar-track { background: transparent; }
 .cat__list::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 99px; }
 
-/* Rows read top-to-bottom, one category per line. */
+/* One chip per category, all of them on the same line. */
 .cat__opt {
   flex: none;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 9px;
-  width: 100%;
-  min-height: 34px;
-  padding: 7px 10px;
-  border-radius: 10px;
-  font-size: 13px;
+  gap: 0;
+  min-height: 32px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
   font-weight: 500;
-  line-height: 1.35;
+  line-height: 1.3;
   color: var(--text-2);
-  text-align: right;
   white-space: nowrap;
   transition: background .14s, color .14s;
 }
 .cat__opt:hover { background: #fdf5ea; color: var(--text); }
-.cat__opt:focus-visible { box-shadow: inset 0 0 0 2px rgba(169, 118, 75, .45); border-radius: 10px; }
+.cat__opt:focus-visible { box-shadow: inset 0 0 0 2px rgba(169, 118, 75, .45); }
+/* The tick takes room only when its chip is the active one, so unselected
+   chips stay tight on the line instead of being indented. */
 .cat__check {
   flex: none;
   display: grid;
   place-items: center;
-  width: 17px;
-  height: 17px;
+  width: 0;
+  margin-inline-end: 0;
+  overflow: hidden;
   color: var(--mint);
   opacity: 0;
   transform: scale(.6);
-  transition: opacity .16s var(--ease), transform .16s var(--ease);
+  transition: width .18s var(--ease), margin-inline-end .18s var(--ease),
+              opacity .16s var(--ease), transform .16s var(--ease);
 }
 .cat__check svg { display: block; }
 .cat__label {
@@ -614,6 +623,8 @@ a { color: inherit; text-decoration: none; }
   font-weight: 650;
 }
 .popover--cats.is-ready .cat__opt[aria-selected="true"] .cat__check {
+  width: 14px;
+  margin-inline-end: 6px;
   opacity: 1;
   transform: scale(1);
 }
@@ -1230,6 +1241,11 @@ a { color: inherit; text-decoration: none; }
   .fbtn--cart { flex: 0 0 auto; }
   .fbtn { flex: 0 0 auto; justify-content: center; padding: 0 13px; font-size: 12.5px; }
   .fbtn__label { overflow: hidden; text-overflow: ellipsis; }
+  /* The bar keeps its single line on phones: the label steps out so the chips
+     get the whole width, and the line scrolls sideways. */
+  .popover--cats { gap: 8px; padding: 5px 8px; }
+  .cat__head { display: none; }
+  .cat__opt { min-height: 30px; padding: 4px 11px; font-size: 12px; }
   .table-footer { justify-content: center; }
   .footer__count { width: 100%; text-align: center; }
   .card { border-radius: 18px; }
