@@ -174,7 +174,7 @@
     if (restoreFocus && anchor) anchor.focus({ preventScroll: true });
   }
 
-  function showPopover(anchor, html, { align = "start", placement = "bottom", className = "", width } = {}) {
+  function showPopover(anchor, html, { align = "start", placement = "bottom", className = "", width, within = null } = {}) {
     const sameAnchor = popAnchor === anchor && openPopover;
     closePopover();
     if (sameAnchor) return null;
@@ -211,6 +211,14 @@
     } else {
       const w = el.offsetWidth;
       let left = align === "end" ? r.right - w : r.left;
+      // Keep the popover inside `within` (e.g. the toolbar's column) when it fits
+      // there; when it is wider than that, center it so it overhangs evenly.
+      const box = within ? within.getBoundingClientRect() : null;
+      if (box) {
+        left = w <= box.width
+          ? Math.max(box.left, Math.min(left, box.right - w))
+          : box.left - (w - box.width) / 2;
+      }
       left = Math.max(edgePad, Math.min(left, window.innerWidth - w - edgePad));
       el.style.left = `${left + window.scrollX}px`;
       el.style.top = `${r.bottom + window.scrollY + 7}px`;
@@ -241,9 +249,14 @@
       return `<button class="bar__opt" type="button" role="menuitemradio" data-filter-category="${esc(c.id)}" dir="${c.dir}" aria-checked="${active}" aria-selected="${active}">${esc(c.label)}</button>`;
     }).join("");
 
-    // The button now lives at the far right of the toolbar, so the bar opens
-    // below it and hugs its right edge.
-    const el = showPopover(e.currentTarget, html, { align: "end", className: "popover--bar popover--bar-below" });
+    // The button sits just left of «سبد خرید» in the right-aligned action pair, so
+    // the bar opens below it and lines up with its right edge. Where it cannot
+    // reach that far left (tablet widths), it stays inside the toolbar's column.
+    const el = showPopover(e.currentTarget, html, {
+      align: "end",
+      within: e.currentTarget.closest(".toolbar"),
+      className: "popover--bar popover--bar-below"
+    });
     if (!el) return;
 
     const opts = [...el.querySelectorAll("[data-filter-category]")];

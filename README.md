@@ -24,10 +24,11 @@ python3 -m http.server 8000
   **Price & Sell Price**, **Status**, and **Score & Rating** (score out of 5, star bar and review count).
   Item ID, create date and stock stay in the data and appear in the details drawer.
 - **Search** by item name, category, item ID or code — debounced, keyboard shortcut `⌘K` / `Ctrl+K` / `/`.
-- **Toolbar order**: search on the left, then a right-aligned action pair — **`سبد خرید`** first and
-  **`دسته بندی ها`** last, so the categories button sits at the far right edge.
-- **Categories bar** (`دسته بندی ها`): floating horizontal category strip that opens below the button and
-  hugs the right edge on click (`همه`, `Coffee / Chocolate`, `Coffee / Cappuccino`, `Coffee Latte`, `Coffee / Espresso`).
+- **Toolbar order**: search on the left, then a right-aligned action pair — **`دسته بندی ها`** first and
+  **`سبد خرید`** last, so the cart button sits at the far right edge.
+- **Categories bar** (`دسته بندی ها`): floating horizontal category strip (`همه`, `Coffee / Chocolate`, `Coffee / Cappuccino`,
+  `Coffee Latte`, `Coffee / Espresso`) that opens below the button and lines up with its right edge on click;
+  on narrower screens it shifts just enough to stay inside the page column.
 - **Sortable columns** — click Item Name, Price or Score & Rating to toggle ascending / descending.
 - **Read-only user view** — menu items are frozen; no inline status editing, duplication, or modification controls.
 - **Single continuous list** — all matching items are shown together without pagination.

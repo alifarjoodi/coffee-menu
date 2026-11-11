@@ -39,8 +39,17 @@
           </svg>
         </label>
 
-        <!-- Right-aligned actions: «سبد خرید» first, then «دسته بندی ها» -->
+        <!-- Right-aligned actions: «دسته بندی ها» first, then «سبد خرید» -->
         <div class="toolbar__actions">
+          <button class="fbtn fbtn--quiet" id="moreFilters" type="button" dir="rtl"
+                  aria-haspopup="true" aria-expanded="false" aria-label="دسته بندی ها">
+            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" aria-hidden="true">
+              <path d="M3.4 5.2h13.2M3.4 10h13.2M3.4 14.8h8.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span class="fbtn__label">دسته بندی ها</span>
+            <span class="fbtn__dot" id="moreFiltersDot" hidden></span>
+          </button>
+
           <button class="fbtn fbtn--cart" id="cartButton" type="button" dir="rtl"
                   aria-haspopup="dialog" aria-expanded="false" aria-controls="cartOffcanvas" aria-label="سبد خرید">
             <svg viewBox="0 0 20 20" width="16" height="16" fill="none" aria-hidden="true">
@@ -50,15 +59,6 @@
             </svg>
             <span class="fbtn__label">سبد خرید</span>
             <span class="fbtn__count" id="cartCount" hidden>0</span>
-          </button>
-
-          <button class="fbtn fbtn--quiet" id="moreFilters" type="button" dir="rtl"
-                  aria-haspopup="true" aria-expanded="false" aria-label="دسته بندی ها">
-            <svg viewBox="0 0 20 20" width="16" height="16" fill="none" aria-hidden="true">
-              <path d="M3.4 5.2h13.2M3.4 10h13.2M3.4 14.8h8.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            <span class="fbtn__label">دسته بندی ها</span>
-            <span class="fbtn__dot" id="moreFiltersDot" hidden></span>
           </button>
         </div>
       </section>
