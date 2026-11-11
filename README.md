@@ -8,7 +8,7 @@ plain HTML, CSS and JavaScript (no frameworks, no build step).
 | File | Purpose |
 |------|---------|
 | `index.html` | Markup: breadcrumb bar, search + filter toolbar, table, result count, drawer |
-| `styles.css` | All styling: design tokens, table, chips, category panel, drawer, responsive rules |
+| `styles.css` | All styling: design tokens, table, chips, category bar, drawer, responsive rules |
 | `app.js` | Data + interactivity: search, filters, sorting, read-only details drawer |
 
 ## Run
@@ -26,15 +26,15 @@ python3 -m http.server 8000
 - **Search** by item name, category, item ID or code — debounced, keyboard shortcut `⌘K` / `Ctrl+K` / `/`.
 - **Toolbar order**: search on the left, then a right-aligned action pair — **`دسته بندی ها`** first and
   **`سبد خرید`** last, so the cart button sits at the far right edge.
-- **Categories bar** (`دسته بندی ها`): opens as **one straight line** — a pill-shaped bar under the button with
-  `همه`, `Coffee / Chocolate`, `Coffee / Cappuccino`, `Coffee Latte` and `Coffee / Espresso` laid out **side by
-  side on a single row** (no stacked list). The bar carries **no `دسته بندی ها` label of its own** — the button
-  already says it — so it starts straight with the chips: it unfolds right below the button, its right edge lined
-  up with it so the chips sit directly under the button, with a notch pointing back at it; the active chip carries
-  the check mark and a soft latte fill. Clicking a chip filters the table straight away; clicking outside, `Esc`,
-  or the button again closes it. The row never wraps: when the screen is narrower than the line (phones), the bar
-  is capped to the viewport and the chips scroll sideways on the same line. `←`/`→` walk the line (RTL-aware),
-  `Home`/`End` jump to its ends.
+- **Categories bar** (`دسته بندی ها`): clicking the button makes the button itself **disappear** and the
+  categories appear **in that same spot in the toolbar** — not in a floating panel below it. The bar takes the
+  button's place on **one straight line** with `همه`, `Coffee / Chocolate`, `Coffee / Cappuccino`, `Coffee Latte`
+  and `Coffee / Espresso` laid out **side by side on a single row** (no stacked list), growing out of the button's
+  spot; the active chip carries the check mark and a soft latte fill. The `×` chip at the far end (it reads RTL)
+  closes the bar and puts the button back in the very same slot; clicking outside, `Esc`, or picking a category
+  does the same. Clicking a chip filters the table straight away. The line never wraps: when the row is narrower
+  than the line, the chips scroll sideways inside the bar. `←`/`→` walk the line (RTL-aware), `Home`/`End` jump
+  to its ends.
 - **Sortable columns** — click Item Name, Price or Score & Rating to toggle ascending / descending.
 - **Read-only user view** — menu items are frozen; no inline status editing, duplication, or modification controls.
 - **Single continuous list** — all matching items are shown together without pagination.

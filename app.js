@@ -156,7 +156,7 @@
       else th.removeAttribute("aria-sort");
     });
 
-    $("#moreFiltersDot").hidden = state.category === "all";
+    $("#moreFiltersDot").hidden = state.category === "all" || !!$(`#${CAT_BAR_ID}`);
     $("#moreFilters").classList.toggle("is-active", state.category !== "all");
   }
 
@@ -254,51 +254,103 @@
   window.addEventListener("resize", () => closePopover());
 
   /* ── Toolbar menus ────────────────────────────────────── */
-  /* «دسته بندی ها» — the categories open on one straight line: a single-row
-     bar of chips, unfolding under the button instead of stacking beside it.
-     The bar carries no «دسته بندی ها» label of its own (the button already
-     says it), so it starts straight with the chips and its right edge lines
-     up with the button — the chips sit directly under it. */
-  $("#moreFilters").addEventListener("click", e => {
-    e.stopPropagation();
-    const rows = CATEGORIES.map(c => {
-      const active = state.category === c.id;
-      return `<button class="cat__opt" type="button" role="menuitemradio" data-filter-category="${esc(c.id)}" aria-checked="${active}" aria-selected="${active}">
+  /* «دسته بندی ها» — the categories open *in place* on one straight line: the
+     button itself disappears and the chip bar takes over that very spot in the
+     toolbar, so the categories appear exactly where the button was instead of
+     in a floating panel under it. A «×» chip (it reads RTL, so it sits at the
+     right end where the button was) closes the bar and brings the button back.
+     The line never wraps: on a narrow screen it scrolls sideways. */
+  const CAT_BAR_ID = "catBar";
+
+  const categoryChipHTML = () => CATEGORIES.map(c => {
+    const active = state.category === c.id;
+    return `<button class="cat__opt" type="button" data-filter-category="${esc(c.id)}" aria-pressed="${active}">
         <span class="cat__check" aria-hidden="true">${icon.check}</span>
         <span class="cat__label">${esc(c.label)}</span>
       </button>`;
-    }).join("");
+  }).join("");
 
-    const el = showPopover(e.currentTarget, `<div class="cat__list">${rows}</div>`, {
-      placement: "inline",
-      role: "menubar",
-      className: "popover--cats",
-      label: "دسته بندی ها"
-    });
-    if (!el) return;
+  function openCategoryBar() {
+    const btn = $("#moreFilters");
+    // An open bar is already showing the categories; a bar that is still on
+    // its way out is dropped so the slot can be filled again cleanly.
+    const existing = $(`#${CAT_BAR_ID}`);
+    if (existing) {
+      if (!existing.classList.contains("is-closing")) return;
+      existing.remove();
+    }
 
-    // Highlight pops into place once the bar has landed.
-    requestAnimationFrame(() => el.classList.add("is-ready"));
+    const bar = document.createElement("div");
+    bar.id = CAT_BAR_ID;
+    bar.className = "catbar";
+    bar.setAttribute("role", "group");
+    bar.setAttribute("aria-label", "دسته بندی ها");
+    bar.setAttribute("dir", "rtl");
+    bar.innerHTML = `
+      <div class="catbar__list">${categoryChipHTML()}</div>
+      <button class="catbar__close" type="button" data-cat-close aria-label="بستن دسته بندی ها" title="بستن">
+        ${icon.close}
+      </button>`;
 
-    const opts = [...el.querySelectorAll("[data-filter-category]")];
+    // The button steps aside and the bar takes its slot in the toolbar.
+    const from = btn.getBoundingClientRect();
+    btn.hidden = true;
+    btn.setAttribute("aria-expanded", "true");
+    btn.after(bar);
 
-    // Focus moves along the line, so keep the touched chip inside the bar.
-    const focusOpt = btn => {
-      if (!btn) return;
-      btn.focus({ preventScroll: true });
-      btn.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+    // FLIP: draw the bar at the button's old size for one frame, then let it
+    // settle — the categories grow out of the button that just vanished. The
+    // bar is right-aligned in the row exactly like the button, so their right
+    // edges match and only a scale is needed.
+    bar.dataset.btnW = String(Math.round(from.width));
+    bar.dataset.btnH = String(Math.round(from.height));
+    const to = bar.getBoundingClientRect();
+    bar.style.transition = "none";
+    bar.style.transformOrigin = "top right";
+    bar.style.transform =
+      `scale(${from.width / to.width}, ${from.height / to.height})`;
+    bar.style.opacity = "0";
+    void bar.offsetWidth;
+    bar.style.transition = "";
+    bar.style.transform = "";
+    bar.style.opacity = "";
+    requestAnimationFrame(() => bar.classList.add("is-ready"));
+
+    const opts = [...bar.querySelectorAll("[data-filter-category]")];
+    const closeBtn = bar.querySelector("[data-cat-close]");
+
+    // Focus walks along the line, so keep the touched chip inside the bar.
+    const focusOpt = el => {
+      if (!el) return;
+      el.focus({ preventScroll: true });
+      el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
     };
 
-    const current = opts.find(b => b.getAttribute("aria-selected") === "true") || opts[0];
+    // The button has just gone away, so focus moves into the bar — onto the
+    // current category, which is also scrolled into view.
+    const current = opts.find(b => b.getAttribute("aria-pressed") === "true") || opts[0];
     if (current) {
-      if (e.detail === 0) focusOpt(current);
-      else current.scrollIntoView({ block: "nearest", inline: "nearest" });
+      current.focus({ preventScroll: true });
+      current.scrollIntoView({ block: "nearest", inline: "nearest" });
     }
+
+    // On a phone the line scrolls sideways: while there is still something
+    // hidden on the left (the end the line runs on towards in RTL), that end
+    // fades out so the extra chips are discoverable.
+    const list = bar.querySelector(".catbar__list");
+    const updateFade = () => {
+      const hidden = list.scrollWidth - list.clientWidth;
+      bar.classList.toggle("has-more", hidden > 1 && Math.abs(list.scrollLeft) < hidden - 1);
+    };
+    updateFade();
+    list.addEventListener("scroll", updateFade, { passive: true });
+
+    closeBtn.addEventListener("click", () => closeCategoryBar({ restoreFocus: true }));
 
     opts.forEach((b, idx) => {
       b.addEventListener("click", ev => {
         state.category = b.dataset.filterCategory;
-        closePopover({ restoreFocus: ev.detail === 0 });
+        closeCategoryBar({ restoreFocus: ev.detail === 0 });
         render();
       });
       b.addEventListener("keydown", ev => {
@@ -319,6 +371,47 @@
         }
       });
     });
+  }
+
+  /* Closing hands the slot back to the button: the bar fades while it narrows
+     to the button's width, then the button takes over — the toolbar glides
+     rather than jumping. */
+  function closeCategoryBar({ restoreFocus = false } = {}) {
+    const bar = $(`#${CAT_BAR_ID}`);
+    const btn = $("#moreFilters");
+    if (!bar || bar.classList.contains("is-closing")) return;
+    // If focus is somewhere inside the bar, it has to land back on the button
+    // once the bar is gone — otherwise it would fall back to the page body.
+    if (bar.contains(document.activeElement)) restoreFocus = true;
+
+    bar.classList.remove("is-ready");
+    bar.classList.add("is-closing");
+
+    // The slot goes back to the button straight away (it fades in), while the
+    // bar shrinks into it — a glide, not a jump.
+    btn.hidden = false;
+    btn.setAttribute("aria-expanded", "false");
+
+    const box = bar.getBoundingClientRect();
+    const w = Number(bar.dataset.btnW) || 42;
+    const h = Number(bar.dataset.btnH) || 42;
+    // …and collapse back into the button's corner of the row.
+    bar.style.transformOrigin = "top right";
+    bar.style.transform = `scale(${w / box.width}, ${h / box.height})`;
+    bar.style.opacity = "0";
+
+    if (restoreFocus) btn.focus({ preventScroll: true });
+    setTimeout(() => {
+      bar.remove();
+      // The button is back for good now — repaint its badge/active state.
+      render();
+    }, 190);
+  }
+
+  $("#moreFilters").addEventListener("click", () => openCategoryBar());
+  // A click anywhere outside the bar puts the button back.
+  document.addEventListener("click", e => {
+    if (!e.target.closest(`#${CAT_BAR_ID}`) && !e.target.closest("#moreFilters")) closeCategoryBar();
   });
 
   /* ── Table interactions ───────────────────────────────── */
@@ -362,6 +455,7 @@
   });
 
   function resetFilters() {
+    closeCategoryBar();
     Object.assign(state, { q: "", category: "all", sortKey: null });
     $("#search").value = "";
     render();
@@ -478,6 +572,7 @@
     const item = ITEMS.find(i => i.id === id);
     if (!item) return;
     closePopover();
+    closeCategoryBar();
     if (cartPanel.classList.contains("is-open")) closeCartPanel();
     drawer.dataset.id = id;
     drawerInner.innerHTML = drawerHTML(item);
@@ -604,6 +699,7 @@
 
   function openCartPanel() {
     closePopover();
+    closeCategoryBar();
     if (drawer.classList.contains("is-open")) closeDrawer();
     renderCartPanel();
     cartPanel.classList.add("is-open");
@@ -689,6 +785,7 @@
       e.preventDefault();
       $("#search").focus();
     } else if (e.key === "Escape") {
+      if ($(`#${CAT_BAR_ID}`)) closeCategoryBar({ restoreFocus: true });
       if (drawer.classList.contains("is-open")) closeDrawer();
       if (cartPanel.classList.contains("is-open")) closeCartPanel({ restoreFocus: true });
       if (openPopover) closePopover({ restoreFocus: openPopover.contains(document.activeElement) });
