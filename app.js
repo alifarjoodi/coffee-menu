@@ -241,7 +241,7 @@
       return `<button class="bar__opt" type="button" role="menuitemradio" data-filter-category="${esc(c.id)}" dir="${c.dir}" aria-checked="${active}" aria-selected="${active}">${esc(c.label)}</button>`;
     }).join("");
 
-    const el = showPopover(e.currentTarget, html, { placement: "left", className: "popover--bar" });
+    const el = showPopover(e.currentTarget, html, { className: "popover--bar popover--bar-below" });
     if (!el) return;
 
     const opts = [...el.querySelectorAll("[data-filter-category]")];
@@ -326,9 +326,36 @@
   const scrim = $("#scrim");
   const drawerInner = $("#drawerInner");
 
+  /* ── Cart offcanvas (slides in from the right) ────────── */
+  const cartButton = $("#cartButton");
+  const cartCountEl = $("#cartCount");
+  const cartPanel = $("#cartOffcanvas");
+  const cartScrim = $("#cartScrim");
+  const cartInner = $("#cartInner");
+
   /* ── Cart quantities (kept while the page is open) ────── */
   const cart = new Map(); // itemId -> quantity
   const cartQty = id => cart.get(id) || 0;
+  const cartTotalQty = () => [...cart.values()].reduce((sum, n) => sum + n, 0);
+
+  function cartLines() {
+    return [...cart.entries()]
+      .map(([id, qty]) => ({ item: ITEMS.find(i => i.id === id), qty }))
+      .filter(line => line.item);
+  }
+
+  /* Toolbar badge — total quantity, with a little bump on every change. */
+  function updateCartBadge() {
+    const n = cartTotalQty();
+    cartCountEl.textContent = n > 99 ? "+99" : String(n);
+    cartCountEl.hidden = n === 0;
+    cartButton.setAttribute("aria-label", n ? `سبد خرید، ${n} آیتم` : "سبد خرید");
+    if (n) {
+      cartCountEl.classList.remove("is-bump");
+      void cartCountEl.offsetWidth; // restart the bump animation
+      cartCountEl.classList.add("is-bump");
+    }
+  }
 
   const iconPlus = `<svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true"><path d="M10 4.4v11.2M4.4 10h11.2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>`;
   const iconMinus = `<svg viewBox="0 0 20 20" width="18" height="18" fill="none" aria-hidden="true"><path d="M4.4 10h11.2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>`;
@@ -404,6 +431,7 @@
     const item = ITEMS.find(i => i.id === id);
     if (!item) return;
     closePopover();
+    if (cartPanel.classList.contains("is-open")) closeCartPanel();
     drawer.dataset.id = id;
     drawerInner.innerHTML = drawerHTML(item);
 
@@ -418,13 +446,15 @@
 
   /* «ثبت سفارش» — places the order with whatever is in the cart, then resets it. */
   function submitOrder() {
-    const total = [...cart.values()].reduce((sum, n) => sum + n, 0);
+    const total = cartTotalQty();
     if (!total) {
       toast("سبد خرید خالی است");
       return;
     }
     cart.clear();
     refreshCart();
+    updateCartBadge();
+    if (cartPanel.classList.contains("is-open")) renderCartPanel();
     toast(total === 1 ? "سفارش ثبت شد" : `سفارش با ${total} آیتم ثبت شد`);
   }
 
@@ -439,6 +469,7 @@
     if (add) {
       cart.set(add.dataset.cartAdd, 1);
       refreshCart({ focusSel: "[data-cart-step='1']" });
+      updateCartBadge();
       toast("به سبد خرید اضافه شد");
       return;
     }
@@ -454,16 +485,138 @@
     else cart.set(id, next);
 
     refreshCart({ focusSel: step > 0 ? "[data-cart-step='1']" : "[data-cart-step='-1']" });
+    updateCartBadge();
   });
 
   function closeDrawer() {
     drawer.classList.remove("is-open");
     drawer.setAttribute("aria-hidden", "true");
     scrim.hidden = true;
-    document.body.style.overflow = "";
+    if (!cartPanel.classList.contains("is-open")) document.body.style.overflow = "";
   }
 
   scrim.addEventListener("click", closeDrawer);
+
+  /* ── Cart offcanvas ───────────────────────────────────── */
+  /* Shows everything purchased so far: one line per item with a compact
+     stepper, the running total, and «ثبت سفارش» pinned to the bottom. */
+  function cartLineHTML({ item, qty }) {
+    return `
+      <div class="oc-item">
+        <span class="oc-item__thumb" style="background:linear-gradient(160deg,#fff,${item.tint})" aria-hidden="true">${item.emoji}</span>
+        <span class="oc-item__info">
+          <span class="oc-item__name" title="${esc(item.name)}">${esc(item.name)}</span>
+          <span class="oc-item__meta" dir="ltr">${money(item.price)} × ${qty}</span>
+        </span>
+        <span class="oc-item__side">
+          <span class="oc-item__total" dir="ltr">${money(item.price * qty)}</span>
+          <span class="oc-qty" role="group" aria-label="تعداد ${esc(item.name)}">
+            <button class="oc-qty__btn" type="button" data-oc-step="-1" data-id="${item.id}" aria-label="کاهش تعداد">${iconMinus}</button>
+            <span class="oc-qty__value">${qty}</span>
+            <button class="oc-qty__btn" type="button" data-oc-step="1" data-id="${item.id}" aria-label="افزایش تعداد">${iconPlus}</button>
+          </span>
+        </span>
+      </div>`;
+  }
+
+  function cartPanelHTML() {
+    const lines = cartLines();
+    const head = `
+      <div class="oc-head">
+        <h2 class="oc-title">سبد خرید</h2>
+        ${lines.length ? `<span class="oc-head__count">${cartTotalQty()} آیتم</span>` : ""}
+        <button class="oc-close" type="button" data-cart-close aria-label="بستن سبد خرید">${icon.close}</button>
+      </div>`;
+
+    if (!lines.length) {
+      return `${head}
+        <div class="oc-body">
+          <div class="oc-empty">
+            <span class="oc-empty__icon" aria-hidden="true">${iconBag}</span>
+            <h3>سبد خرید خالی است</h3>
+            <p>روی هر آیتم کلیک کنید و با «افزودن به سبد خرید» آن را به اینجا اضافه کنید.</p>
+          </div>
+        </div>`;
+    }
+
+    const total = lines.reduce((sum, line) => sum + line.item.price * line.qty, 0);
+    return `${head}
+      <div class="oc-body">${lines.map(cartLineHTML).join("")}</div>
+      <footer class="oc-foot">
+        <div class="oc-total">
+          <span class="oc-total__label">مجموع</span>
+          <span class="oc-total__value" dir="ltr">${money(total)}</span>
+        </div>
+        <button class="d-submit" type="button" id="cartSubmit">ثبت سفارش</button>
+      </footer>`;
+  }
+
+  function renderCartPanel() {
+    cartInner.innerHTML = cartPanelHTML();
+  }
+
+  function openCartPanel() {
+    closePopover();
+    if (drawer.classList.contains("is-open")) closeDrawer();
+    renderCartPanel();
+    cartPanel.classList.add("is-open");
+    cartPanel.setAttribute("aria-hidden", "false");
+    cartScrim.hidden = false;
+    document.body.style.overflow = "hidden";
+    cartButton.setAttribute("aria-expanded", "true");
+    const closeBtn = cartInner.querySelector("[data-cart-close]");
+    if (closeBtn) closeBtn.focus({ preventScroll: true });
+  }
+
+  function closeCartPanel({ restoreFocus = false } = {}) {
+    if (!cartPanel.classList.contains("is-open")) return;
+    cartPanel.classList.remove("is-open");
+    cartPanel.setAttribute("aria-hidden", "true");
+    cartScrim.hidden = true;
+    cartButton.setAttribute("aria-expanded", "false");
+    if (!drawer.classList.contains("is-open")) document.body.style.overflow = "";
+    if (restoreFocus) cartButton.focus({ preventScroll: true });
+  }
+
+  cartButton.addEventListener("click", () => {
+    if (cartPanel.classList.contains("is-open")) closeCartPanel({ restoreFocus: true });
+    else openCartPanel();
+  });
+
+  cartScrim.addEventListener("click", () => closeCartPanel({ restoreFocus: true }));
+
+  /* Cart interactions inside the offcanvas (delegated: innerHTML is re-rendered). */
+  cartInner.addEventListener("click", e => {
+    if (e.target.closest("[data-cart-close]")) {
+      closeCartPanel({ restoreFocus: true });
+      return;
+    }
+
+    if (e.target.closest("#cartSubmit")) {
+      submitOrder();
+      return;
+    }
+
+    const stepBtn = e.target.closest("[data-oc-step]");
+    if (!stepBtn) return;
+
+    const id = stepBtn.dataset.id;
+    const step = Number(stepBtn.dataset.ocStep);
+    const next = Math.max(0, cartQty(id) + step);
+
+    if (next === 0) cart.delete(id);
+    else cart.set(id, next);
+
+    updateCartBadge();
+    renderCartPanel();
+
+    /* Re-focus the same stepper button (or the close button once the line
+       disappears), because the panel was just re-rendered. */
+    const focusTarget = next > 0
+      ? cartInner.querySelector(`[data-oc-step="${step}"][data-id="${id}"]`)
+      : cartInner.querySelector("[data-cart-close]");
+    if (focusTarget) focusTarget.focus({ preventScroll: true });
+  });
 
   /* ── Toasts ───────────────────────────────────────────── */
   function toast(msg) {
@@ -490,6 +643,7 @@
       $("#search").focus();
     } else if (e.key === "Escape") {
       if (drawer.classList.contains("is-open")) closeDrawer();
+      if (cartPanel.classList.contains("is-open")) closeCartPanel({ restoreFocus: true });
       if (openPopover) closePopover({ restoreFocus: openPopover.contains(document.activeElement) });
       if (document.activeElement === $("#search")) $("#search").blur();
     }
@@ -497,4 +651,5 @@
 
   /* ── Boot ─────────────────────────────────────────────── */
   render();
+  updateCartBadge();
 })();
