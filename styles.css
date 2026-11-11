@@ -168,7 +168,7 @@ a { color: inherit; text-decoration: none; }
 }
 .search input::placeholder { color: #b09c89; }
 .search input::-webkit-search-cancel-button { display: none; }
-/* Right-aligned action group: «سبد خرید» then «دسته بندی ها» (categories at the far right) */
+/* Right-aligned action group: «دسته بندی ها» then «سبد خرید» (cart at the far right) */
 .toolbar__actions {
   display: flex;
   align-items: center;
@@ -209,7 +209,7 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 0 0 3px #fff;
 }
 
-/* Cart button — first in the right-aligned action group */
+/* Cart button — last in the right-aligned action group (far right edge) */
 .fbtn--cart {
   color: #fff8f0;
   font-weight: 600;
@@ -1139,7 +1139,7 @@ a { color: inherit; text-decoration: none; }
 
 @media (max-width: 640px) {
   .topbar { padding-top: 14px; }
-  /* search takes its own row; the cart + categories pair stays together on the right */
+  /* search takes its own row; the categories + cart pair stays together on the right */
   .search { order: -1; max-width: none; flex-basis: 100%; }
   .toolbar__actions { margin-left: auto; gap: 8px; }
   .fbtn--cart { flex: 0 0 auto; }
