@@ -369,12 +369,12 @@
         <div class="d-summary">
           <h2 class="d-name">${esc(item.name)}</h2>
           <span class="d-cat">${esc(item.category)}</span>
-          <div class="d-price">
-            <span class="d-price__value">${money(item.price)}</span>
-          </div>
         </div>
       </div>
 
+      <div class="d-price">
+        <span class="d-price__value">${money(item.price)}</span>
+      </div>
       <p class="d-desc">${esc(item.desc)}</p>
 
       <div class="d-cta">
