@@ -36,7 +36,6 @@
 
   const state = {
     q: "",
-    status: "all",
     stock: "all",
     sortKey: null,
     sortDir: "asc"
@@ -65,7 +64,6 @@
         const hay = `${item.name} ${item.category} ${item.code} ${item.id}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
-      if (state.status !== "all" && item.status !== state.status) return false;
       if (stockRule.test && !stockRule.test(item.stock)) return false;
       return true;
     });
@@ -157,10 +155,6 @@
       else th.removeAttribute("aria-sort");
     });
 
-    // filter button feedback
-    $("#statusFilterLabel").textContent = state.status === "all" ? "All Status" : STATUS[state.status].label;
-    $("#statusFilter").classList.toggle("is-active", state.status !== "all");
-
     $("#moreFiltersDot").hidden = state.stock === "all";
     $("#moreFilters").classList.toggle("is-active", state.stock !== "all");
   }
@@ -211,32 +205,6 @@
   window.addEventListener("resize", closePopover);
 
   /* ── Toolbar menus ────────────────────────────────────── */
-  $("#statusFilter").addEventListener("click", e => {
-    e.stopPropagation();
-    const counts = {};
-    ITEMS.forEach(i => { counts[i.status] = (counts[i.status] || 0) + 1; });
-
-    const html = `
-      <div class="popover__title">Filter by status</div>
-      <button class="popover__opt" type="button" data-filter-status="all" aria-selected="${state.status === "all"}">
-        <span class="dot" style="background:#c8d2ce"></span> All Status
-        <span class="count">${ITEMS.length}</span>
-      </button>
-      <div class="popover__sep"></div>
-      ${Object.entries(STATUS).map(([key, s]) => `
-        <button class="popover__opt" type="button" data-filter-status="${key}" aria-selected="${state.status === key}">
-          <span class="dot" style="background:${s.color}"></span> ${s.label}
-          <span class="count">${counts[key] || 0}</span>
-        </button>`).join("")}`;
-
-    const el = showPopover(e.currentTarget, html, { align: "end", width: "220px" });
-    el?.querySelectorAll("[data-filter-status]").forEach(b => b.addEventListener("click", () => {
-      state.status = b.dataset.filterStatus;
-      closePopover();
-      render();
-    }));
-  });
-
   $("#moreFilters").addEventListener("click", e => {
     e.stopPropagation();
     const html = `
@@ -308,7 +276,7 @@
   });
 
   function resetFilters() {
-    Object.assign(state, { q: "", status: "all", stock: "all", sortKey: null });
+    Object.assign(state, { q: "", stock: "all", sortKey: null });
     $("#search").value = "";
     render();
     toast("Filters reset");
