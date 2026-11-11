@@ -146,7 +146,6 @@
     $("#resultCount").innerHTML = total
       ? `Showing <b>${total}</b> ${total === 1 ? "item" : "items"}`
       : `No items found`;
-    $("#topCount").textContent = total;
 
     // sort indicators
     document.querySelectorAll(".sort").forEach(btn => {
