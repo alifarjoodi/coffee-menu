@@ -533,8 +533,8 @@ a { color: inherit; text-decoration: none; }
 }
 @keyframes fade { from { opacity: 0; } }
 
-/* Details drawer — image top-right · name beside it · price under the image ·
-   description below · add-to-cart control pinned to the bottom. */
+/* Details drawer — image top-right · name beside it · price lined up under the
+   name · description below · add-to-cart + place-order stack glued to the bottom. */
 .drawer {
   position: fixed;
   top: 0; right: 0; bottom: 0;
@@ -553,8 +553,7 @@ a { color: inherit; text-decoration: none; }
 }
 .drawer.is-open { transform: none; }
 .drawer__inner {
-  --pad-x: 24px;       /* horizontal inset, reused to place the price */
-  --price-left: 10px;  /* price sits this far from the drawer’s left edge */
+  --pad-x: 24px;       /* horizontal inset shared by the name and the price */
   padding: 18px var(--pad-x) 26px;
   min-height: 100%;
   display: flex;
@@ -608,11 +607,12 @@ a { color: inherit; text-decoration: none; }
   box-shadow: inset 0 1px 0 #fff, 0 16px 28px -20px rgba(120, 86, 55, .5);
 }
 
-/* price — no box, flush to the left, 10px in from the drawer edge */
+/* price — no “قیمت” label, no box; sits a little lower and starts on the same
+   left edge as the item name */
 .d-price {
-  align-self: flex-start;
-  margin-left: calc(var(--price-left) - var(--pad-x));
-  margin-top: 6px;
+  align-self: stretch;
+  margin-left: 0;
+  margin-top: 12px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -623,13 +623,6 @@ a { color: inherit; text-decoration: none; }
   background: none;
   border: 0;
   box-shadow: none;
-}
-.d-price__label {
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: #a3856a;
 }
 .d-price__value {
   font-size: 26px;
@@ -679,7 +672,7 @@ a { color: inherit; text-decoration: none; }
   text-overflow: ellipsis;
 }
 
-/* description now sits under the actions, further down the drawer */
+/* description — follows the name/price block, above the bottom-pinned actions */
 .d-desc {
   margin: 0;
   font-size: 13px;
@@ -690,17 +683,19 @@ a { color: inherit; text-decoration: none; }
   overflow-wrap: anywhere;
 }
 
-/* action stack — add-to-cart first, then «ثبت سفارش» */
+/* action stack — glued to the bottom of the drawer:
+   «افزودن به سبد خرید» first, «ثبت سفارش» right underneath it. */
 .d-cta {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: auto;
 }
 
-/* cart control — milky + coffee palette, no longer pinned to the bottom */
+/* cart control — milky + coffee palette, part of the bottom-pinned stack */
 .d-actions {
-  margin-top: 0;
-  padding-top: 0;
+  margin: 0;
+  padding: 0;
 }
 .d-actions.is-swap > * { animation: cartPop .26s var(--ease) both; }
 @keyframes cartPop {
@@ -884,7 +879,7 @@ a { color: inherit; text-decoration: none; }
   .d-top { --thumb: 104px; gap: 14px; }
   .d-thumb { font-size: 46px; border-radius: 22px; }
   .d-name { font-size: 16.5px; }
-  .d-price { margin-top: 4px; }
+  .d-price { margin-top: 10px; }
   .d-price__value { font-size: 22px; }
 }
 

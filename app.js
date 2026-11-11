@@ -354,9 +354,10 @@
 
   /* Drawer layout: product image on the top right (with a little breathing room
      from the top edge), the name glued to the top of the image, the price —
-     without its box — 10px in from the drawer's left edge, the add-to-cart
-     control straight underneath, the «ثبت سفارش» button below it, and the
-     description last, further down the panel. */
+     without its “قیمت” label and without its box — sitting a little lower,
+     lined up on the left edge with the item name, the description below it,
+     and the «افزودن به سبد خرید» + «ثبت سفارش» stack glued to the bottom of
+     the panel, in that order. */
   function drawerHTML(item) {
     return `
       <div class="d-head">
@@ -372,18 +373,17 @@
           <h2 class="d-name">${esc(item.name)}</h2>
           <span class="d-cat">${esc(item.category)}</span>
           <div class="d-price">
-            <span class="d-price__label">قیمت</span>
             <span class="d-price__value">${money(item.price)}</span>
           </div>
         </div>
       </div>
 
+      <p class="d-desc">${esc(item.desc)}</p>
+
       <div class="d-cta">
         <div class="d-actions" id="cartActions">${cartControlHTML(item)}</div>
         <button class="d-submit" type="button" id="submitOrder">ثبت سفارش</button>
-      </div>
-
-      <p class="d-desc">${esc(item.desc)}</p>`;
+      </div>`;
   }
 
   /* Re-render only the bottom control, so the stepper appears/disappears in place. */
