@@ -24,7 +24,7 @@ python3 -m http.server 8000
   **Price & Sell Price**, **Status**, and **Score & Rating** (score out of 5, star bar and review count).
   Item ID, create date and stock stay in the data and appear in the details drawer.
 - **Search** by item name, category, item ID or code — debounced, keyboard shortcut `⌘K` / `Ctrl+K` / `/`.
-- **More Filters** popover: stock level (well stocked / low / out) plus quick sorts.
+- **Categories bar** (`دسته بندی ها`): floating horizontal category strip that opens to the left of the button on click (`همه`, `Coffee / Chocolate`, `Coffee / Cappuccino`, `Coffee Latte`, `Coffee / Espresso`).
 - **Sortable columns** — click Item Name, Price or Score & Rating to toggle ascending / descending.
 - **Read-only user view** — menu items are frozen; no inline status editing, duplication, or modification controls.
 - **Single continuous list** — all matching items are shown together without pagination.

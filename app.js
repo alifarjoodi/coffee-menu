@@ -27,16 +27,18 @@
     unavailable: Object.freeze({ label: "ناموجود", cls: "unavailable", color: "#c26a55" })
   });
 
-  const STOCK_FILTERS = {
-    all:  { label: "All stock levels" },
-    high: { label: "Well stocked",  test: n => n >= 500 },
-    low:  { label: "Low stock (< 500)", test: n => n > 0 && n < 500 },
-    out:  { label: "Out of stock", test: n => n === 0 }
-  };
+  const CATEGORIES = Object.freeze([
+    { id: "all", label: "همه", dir: "rtl" },
+    ...[...new Set(ITEMS.map(item => item.category))].map(cat => ({
+      id: cat,
+      label: cat,
+      dir: "ltr"
+    }))
+  ]);
 
   const state = {
     q: "",
-    stock: "all",
+    category: "all",
     sortKey: null,
     sortDir: "asc"
   };
@@ -57,14 +59,13 @@
   /* ── Filtering / sorting ──────────────────────────────── */
   function filtered() {
     const q = state.q.trim().toLowerCase();
-    const stockRule = STOCK_FILTERS[state.stock];
 
     let list = ITEMS.filter(item => {
+      if (state.category !== "all" && item.category !== state.category) return false;
       if (q) {
         const hay = `${item.name} ${item.category} ${item.code} ${item.id}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
-      if (stockRule.test && !stockRule.test(item.stock)) return false;
       return true;
     });
 
@@ -155,8 +156,8 @@
       else th.removeAttribute("aria-sort");
     });
 
-    $("#moreFiltersDot").hidden = state.stock === "all";
-    $("#moreFilters").classList.toggle("is-active", state.stock !== "all");
+    $("#moreFiltersDot").hidden = state.category === "all";
+    $("#moreFilters").classList.toggle("is-active", state.category !== "all");
   }
 
   /* ── Popover engine ───────────────────────────────────── */
@@ -164,31 +165,56 @@
   let openPopover = null;
   let popAnchor = null;
 
-  function closePopover() {
+  function closePopover({ restoreFocus = false } = {}) {
+    const anchor = popAnchor;
     if (openPopover) openPopover.remove();
-    if (popAnchor) popAnchor.setAttribute("aria-expanded", "false");
+    if (anchor) anchor.setAttribute("aria-expanded", "false");
     openPopover = null;
     popAnchor = null;
+    if (restoreFocus && anchor) anchor.focus({ preventScroll: true });
   }
 
-  function showPopover(anchor, html, { align = "start", width } = {}) {
+  function showPopover(anchor, html, { align = "start", placement = "bottom", className = "", width } = {}) {
     const sameAnchor = popAnchor === anchor && openPopover;
     closePopover();
     if (sameAnchor) return null;
 
     const el = document.createElement("div");
-    el.className = "popover";
+    el.className = className ? `popover ${className}` : "popover";
     el.setAttribute("role", "menu");
     el.innerHTML = html;
     if (width) el.style.minWidth = width;
     host.appendChild(el);
 
     const r = anchor.getBoundingClientRect();
-    const w = el.offsetWidth;
-    let left = align === "end" ? r.right - w : r.left;
-    left = Math.max(10, Math.min(left, window.innerWidth - w - 10));
-    el.style.left = `${left + window.scrollX}px`;
-    el.style.top = `${r.bottom + window.scrollY + 7}px`;
+    const edgePad = 10;
+
+    if (placement === "left") {
+      const gap = 8;
+      const availableLeft = r.left - gap - edgePad;
+      if (availableLeft >= 140) {
+        el.style.maxWidth = `${Math.floor(availableLeft)}px`;
+        const w = el.offsetWidth;
+        const h = el.offsetHeight;
+        const left = Math.max(edgePad, r.left - gap - w);
+        const top = Math.max(edgePad, r.top + (r.height - h) / 2);
+        el.style.left = `${left + window.scrollX}px`;
+        el.style.top = `${top + window.scrollY}px`;
+      } else {
+        el.classList.add("popover--bar-below");
+        el.style.maxWidth = `${Math.max(120, window.innerWidth - edgePad * 2)}px`;
+        const w = el.offsetWidth;
+        const left = Math.max(edgePad, Math.min(r.right - w, window.innerWidth - w - edgePad));
+        el.style.left = `${left + window.scrollX}px`;
+        el.style.top = `${r.bottom + window.scrollY + 7}px`;
+      }
+    } else {
+      const w = el.offsetWidth;
+      let left = align === "end" ? r.right - w : r.left;
+      left = Math.max(edgePad, Math.min(left, window.innerWidth - w - edgePad));
+      el.style.left = `${left + window.scrollX}px`;
+      el.style.top = `${r.bottom + window.scrollY + 7}px`;
+    }
 
     anchor.setAttribute("aria-expanded", "true");
     openPopover = el;
@@ -201,38 +227,51 @@
       closePopover();
     }
   });
-  window.addEventListener("scroll", closePopover, true);
-  window.addEventListener("resize", closePopover);
+  window.addEventListener("scroll", e => {
+    if (openPopover && openPopover.contains(e.target)) return;
+    closePopover();
+  }, true);
+  window.addEventListener("resize", () => closePopover());
 
   /* ── Toolbar menus ────────────────────────────────────── */
   $("#moreFilters").addEventListener("click", e => {
     e.stopPropagation();
-    const html = `
-      <div class="popover__title">Stock level</div>
-      ${Object.entries(STOCK_FILTERS).map(([key, f]) => `
-        <button class="popover__opt" type="button" data-filter-stock="${key}" aria-selected="${state.stock === key}">
-          ${f.label}
-          <span class="check">${icon.check}</span>
-        </button>`).join("")}
-      <div class="popover__sep"></div>
-      <div class="popover__title">Sort</div>
-      <button class="popover__opt" type="button" data-sort-quick="price" aria-selected="${state.sortKey === "price" && state.sortDir === "desc"}">
-        Price: high → low <span class="check">${icon.check}</span>
-      </button>`;
+    const html = CATEGORIES.map(c => {
+      const active = state.category === c.id;
+      return `<button class="bar__opt" type="button" role="menuitemradio" data-filter-category="${esc(c.id)}" dir="${c.dir}" aria-checked="${active}" aria-selected="${active}">${esc(c.label)}</button>`;
+    }).join("");
 
-    const el = showPopover(e.currentTarget, html, { align: "end", width: "232px" });
+    const el = showPopover(e.currentTarget, html, { placement: "left", className: "popover--bar" });
     if (!el) return;
-    el.querySelectorAll("[data-filter-stock]").forEach(b => b.addEventListener("click", () => {
-      state.stock = b.dataset.filterStock;
-      closePopover();
-      render();
-    }));
-    el.querySelectorAll("[data-sort-quick]").forEach(b => b.addEventListener("click", () => {
-      state.sortKey = b.dataset.sortQuick;
-      state.sortDir = b.dataset.sortQuick === "price" ? "desc" : "asc";
-      closePopover();
-      render();
-    }));
+
+    const opts = [...el.querySelectorAll("[data-filter-category]")];
+    if (e.detail === 0) {
+      const current = opts.find(b => b.getAttribute("aria-selected") === "true") || opts[0];
+      if (current) current.focus({ preventScroll: true });
+    }
+
+    opts.forEach((b, idx) => {
+      b.addEventListener("click", ev => {
+        state.category = b.dataset.filterCategory;
+        closePopover({ restoreFocus: ev.detail === 0 });
+        render();
+      });
+      b.addEventListener("keydown", ev => {
+        if (ev.key === "ArrowLeft") {
+          ev.preventDefault();
+          opts[(idx + 1) % opts.length].focus();
+        } else if (ev.key === "ArrowRight") {
+          ev.preventDefault();
+          opts[(idx - 1 + opts.length) % opts.length].focus();
+        } else if (ev.key === "Home") {
+          ev.preventDefault();
+          opts[0].focus();
+        } else if (ev.key === "End") {
+          ev.preventDefault();
+          opts[opts.length - 1].focus();
+        }
+      });
+    });
   });
 
   /* ── Table interactions ───────────────────────────────── */
@@ -276,7 +315,7 @@
   });
 
   function resetFilters() {
-    Object.assign(state, { q: "", stock: "all", sortKey: null });
+    Object.assign(state, { q: "", category: "all", sortKey: null });
     $("#search").value = "";
     render();
     toast("Filters reset");
@@ -357,7 +396,7 @@
       $("#search").focus();
     } else if (e.key === "Escape") {
       if (drawer.classList.contains("is-open")) closeDrawer();
-      closePopover();
+      if (openPopover) closePopover({ restoreFocus: openPopover.contains(document.activeElement) });
       if (document.activeElement === $("#search")) $("#search").blur();
     }
   });
