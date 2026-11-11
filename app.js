@@ -179,7 +179,7 @@
     setTimeout(() => el.remove(), 150);
   }
 
-  function showPopover(anchor, html, { align = "start", placement = "bottom", className = "", width, leading = "", label = "" } = {}) {
+  function showPopover(anchor, html, { align = "start", placement = "bottom", className = "", role = "menu", width, leading = "", label = "" } = {}) {
     const sameAnchor = popAnchor === anchor && openPopover;
     closePopover({ animate: !sameAnchor });
     if (sameAnchor) return null;
@@ -190,7 +190,7 @@
 
     const el = document.createElement("div");
     el.className = className ? `popover ${className}` : "popover";
-    el.setAttribute("role", "menu");
+    el.setAttribute("role", role);
     if (label) el.setAttribute("aria-label", label);
     el.innerHTML = leading + html;
     if (width) el.style.minWidth = width;
@@ -203,43 +203,30 @@
     const edgePad = 10;
     const gap = 8;
 
-    if (placement === "left") {
-      /* Open a vertical panel beside the button: flush to its left edge with a
-         small gap, its top lined up with the button. When there is not enough
-         room over there (phones), tuck the same stacked panel under it so the
-         rows keep reading top-to-bottom. */
-      const roomLeft = r.left - gap - edgePad;
-      el.style.maxHeight = `${Math.max(120, window.innerHeight - edgePad * 2)}px`;
+    if (placement === "inline") {
+      /* Open a one-line bar under the button. The bar never stacks or wraps:
+         everything stays on the same line, so instead of growing past the
+         screen it is capped to the viewport and the line scrolls sideways.
+         It hugs the button's right edge (the bar reads RTL) and the notch is
+         pointed at the middle of the button. */
+      const avail = window.innerWidth - edgePad * 2;
+      el.style.maxWidth = `${Math.floor(avail)}px`;
 
-      if (roomLeft >= 210) {
-        el.style.maxWidth = `${Math.floor(roomLeft)}px`;
-        const w = el.offsetWidth;
-        const h = el.offsetHeight;
-        const top = Math.max(edgePad, Math.min(r.top - 6, window.innerHeight - edgePad - h));
-        el.style.left = `${Math.round(r.left - gap - w + window.scrollX)}px`;
-        el.style.top = `${Math.round(top + window.scrollY)}px`;
-        // Point the little notch at the middle of the button.
-        el.style.setProperty("--caret-y", `${Math.round(r.top + r.height / 2 - top)}px`);
+      const w = Math.min(el.offsetWidth, avail);
+      const h = el.offsetHeight;
+      let left = Math.max(edgePad, Math.min(r.right - w, window.innerWidth - w - edgePad));
+      el.style.left = `${Math.round(left + window.scrollX)}px`;
+
+      const roomBelow = window.innerHeight - r.bottom - gap - edgePad;
+      if (roomBelow >= h) {
+        el.style.top = `${Math.round(r.bottom + gap + window.scrollY)}px`;
       } else {
-        // Phones: no room beside the button, so the very same stacked list sits
-        // under it, right edge lined up with the button.
-        el.classList.add("popover--below");
-        el.style.maxWidth = `${Math.max(160, window.innerWidth - edgePad * 2)}px`;
-        const w = el.offsetWidth;
-        const left = Math.max(edgePad, Math.min(r.right - w, window.innerWidth - w - edgePad));
-        const roomBelow = window.innerHeight - r.bottom - gap - edgePad;
-        if (roomBelow >= 180) {
-          el.style.maxHeight = `${roomBelow}px`;
-          el.style.top = `${Math.round(r.bottom + gap + window.scrollY)}px`;
-        } else {
-          // Flip above the button when the bottom is cramped.
-          el.style.maxHeight = `${Math.max(120, r.top - gap - edgePad)}px`;
-          el.style.top = `${Math.round(Math.max(edgePad, r.top - gap - el.offsetHeight) + window.scrollY)}px`;
-        }
-        el.style.left = `${Math.round(left + window.scrollX)}px`;
-        const caretX = (r.left + r.width / 2) - left;
-        el.style.setProperty("--caret-x", `${Math.round(Math.max(18, Math.min(caretX, Math.min(w, window.innerWidth - left) - 18)))}px`);
+        // Only when the bottom of the screen is cramped: same line, above.
+        el.classList.add("popover--above");
+        el.style.top = `${Math.round(Math.max(edgePad, r.top - gap - h) + window.scrollY)}px`;
       }
+      el.style.setProperty("--caret-x",
+        `${Math.round(Math.max(18, Math.min(r.left + r.width / 2 - left, w - 18)))}px`);
     } else {
       const w = el.offsetWidth;
       let left = align === "end" ? r.right - w : r.left;
@@ -267,8 +254,8 @@
   window.addEventListener("resize", () => closePopover());
 
   /* ── Toolbar menus ────────────────────────────────────── */
-  /* «دسته بندی ها» — a stacked (linear) list that slides out from the side of
-     the button: flush to its left edge, top aligned with the button. */
+  /* «دسته بندی ها» — the categories open on one straight line: a single-row
+     bar of chips, unfolding under the button instead of stacking beside it. */
   $("#moreFilters").addEventListener("click", e => {
     e.stopPropagation();
     const rows = CATEGORIES.map(c => {
@@ -280,20 +267,30 @@
     }).join("");
 
     const el = showPopover(e.currentTarget, `<div class="cat__list">${rows}</div>`, {
-      placement: "left",
+      placement: "inline",
+      role: "menubar",
       className: "popover--cats",
       label: "دسته بندی ها",
       leading: `<div class="cat__head" role="presentation">دسته بندی ها</div>`
     });
     if (!el) return;
 
-    // Highlight pops into place once the panel has landed.
+    // Highlight pops into place once the bar has landed.
     requestAnimationFrame(() => el.classList.add("is-ready"));
 
     const opts = [...el.querySelectorAll("[data-filter-category]")];
-    if (e.detail === 0) {
-      const current = opts.find(b => b.getAttribute("aria-selected") === "true") || opts[0];
-      if (current) current.focus({ preventScroll: true });
+
+    // Focus moves along the line, so keep the touched chip inside the bar.
+    const focusOpt = btn => {
+      if (!btn) return;
+      btn.focus({ preventScroll: true });
+      btn.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+    };
+
+    const current = opts.find(b => b.getAttribute("aria-selected") === "true") || opts[0];
+    if (current) {
+      if (e.detail === 0) focusOpt(current);
+      else current.scrollIntoView({ block: "nearest", inline: "nearest" });
     }
 
     opts.forEach((b, idx) => {
@@ -303,18 +300,20 @@
         render();
       });
       b.addEventListener("keydown", ev => {
-        if (ev.key === "ArrowDown" || ev.key === "ArrowLeft") {
+        // One line, so the line is walked sideways — and in RTL «next» sits to
+        // the left of «previous».
+        if (ev.key === "ArrowLeft" || ev.key === "ArrowDown") {
           ev.preventDefault();
-          opts[(idx + 1) % opts.length].focus();
-        } else if (ev.key === "ArrowUp" || ev.key === "ArrowRight") {
+          focusOpt(opts[(idx + 1) % opts.length]);
+        } else if (ev.key === "ArrowRight" || ev.key === "ArrowUp") {
           ev.preventDefault();
-          opts[(idx - 1 + opts.length) % opts.length].focus();
+          focusOpt(opts[(idx - 1 + opts.length) % opts.length]);
         } else if (ev.key === "Home") {
           ev.preventDefault();
-          opts[0].focus();
+          focusOpt(opts[0]);
         } else if (ev.key === "End") {
           ev.preventDefault();
-          opts[opts.length - 1].focus();
+          focusOpt(opts[opts.length - 1]);
         }
       });
     });
