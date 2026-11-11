@@ -179,7 +179,7 @@
     setTimeout(() => el.remove(), 150);
   }
 
-  function showPopover(anchor, html, { align = "start", placement = "bottom", className = "", role = "menu", width, leading = "", label = "" } = {}) {
+  function showPopover(anchor, html, { align = "start", placement = "bottom", className = "", role = "menu", width, label = "" } = {}) {
     const sameAnchor = popAnchor === anchor && openPopover;
     closePopover({ animate: !sameAnchor });
     if (sameAnchor) return null;
@@ -192,7 +192,7 @@
     el.className = className ? `popover ${className}` : "popover";
     el.setAttribute("role", role);
     if (label) el.setAttribute("aria-label", label);
-    el.innerHTML = leading + html;
+    el.innerHTML = html;
     if (width) el.style.minWidth = width;
     // Measure at natural size first (CSS animates opacity/transform only, so the
     // offsetWidth here is final), then fit it into the viewport and place it.
@@ -255,7 +255,10 @@
 
   /* ── Toolbar menus ────────────────────────────────────── */
   /* «دسته بندی ها» — the categories open on one straight line: a single-row
-     bar of chips, unfolding under the button instead of stacking beside it. */
+     bar of chips, unfolding under the button instead of stacking beside it.
+     The bar carries no «دسته بندی ها» label of its own (the button already
+     says it), so it starts straight with the chips and its right edge lines
+     up with the button — the chips sit directly under it. */
   $("#moreFilters").addEventListener("click", e => {
     e.stopPropagation();
     const rows = CATEGORIES.map(c => {
@@ -270,8 +273,7 @@
       placement: "inline",
       role: "menubar",
       className: "popover--cats",
-      label: "دسته بندی ها",
-      leading: `<div class="cat__head" role="presentation">دسته بندی ها</div>`
+      label: "دسته بندی ها"
     });
     if (!el) return;
 

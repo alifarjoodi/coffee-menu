@@ -476,9 +476,11 @@ a { color: inherit; text-decoration: none; }
 @keyframes pop { from { opacity: 0; transform: translateY(-5px) scale(.985); } }
 
 /* ── Category bar («دسته بندی ها») ──────────────────────────
-   One straight line: the label and every category sit side by side on a
-   single row, never stacked. The bar unfolds right under the button (its
-   right edge lined up with it, since it reads RTL) and the notch on its top
+   One straight line: every category sits side by side on a single row, never
+   stacked. There is no «دسته بندی ها» label inside the bar — the button
+   already says it — so the bar starts straight with the chips. It unfolds
+   right under the button (its right edge lined up with it, since it reads
+   RTL, putting the chips directly under the button) and the notch on its top
    edge points back at the button. It does not wrap — on a narrow screen the
    row keeps going and scrolls sideways instead. */
 .popover--cats {
@@ -550,17 +552,6 @@ a { color: inherit; text-decoration: none; }
 }
 .popover--cats.popover--above.is-closing { animation-name: catLineOutUp; }
 
-/* The label leads the line, then a hairline divider, then the chips. */
-.cat__head {
-  flex: none;
-  padding-inline-end: 10px;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: .06em;
-  color: var(--text-3);
-  white-space: nowrap;
-  border-inline-end: 1px solid var(--line);
-}
 /* The row itself: one line, scrolling sideways when it cannot all fit. */
 .cat__list {
   display: flex;
@@ -1241,10 +1232,9 @@ a { color: inherit; text-decoration: none; }
   .fbtn--cart { flex: 0 0 auto; }
   .fbtn { flex: 0 0 auto; justify-content: center; padding: 0 13px; font-size: 12.5px; }
   .fbtn__label { overflow: hidden; text-overflow: ellipsis; }
-  /* The bar keeps its single line on phones: the label steps out so the chips
-     get the whole width, and the line scrolls sideways. */
+  /* The bar keeps its single line on phones: the chips get the whole width
+     and the line scrolls sideways. */
   .popover--cats { gap: 8px; padding: 5px 8px; }
-  .cat__head { display: none; }
   .cat__opt { min-height: 30px; padding: 4px 11px; font-size: 12px; }
   .table-footer { justify-content: center; }
   .footer__count { width: 100%; text-align: center; }
