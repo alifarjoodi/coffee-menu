@@ -241,7 +241,9 @@
       return `<button class="bar__opt" type="button" role="menuitemradio" data-filter-category="${esc(c.id)}" dir="${c.dir}" aria-checked="${active}" aria-selected="${active}">${esc(c.label)}</button>`;
     }).join("");
 
-    const el = showPopover(e.currentTarget, html, { className: "popover--bar popover--bar-below" });
+    // The button now lives at the far right of the toolbar, so the bar opens
+    // below it and hugs its right edge.
+    const el = showPopover(e.currentTarget, html, { align: "end", className: "popover--bar popover--bar-below" });
     if (!el) return;
 
     const opts = [...el.querySelectorAll("[data-filter-category]")];

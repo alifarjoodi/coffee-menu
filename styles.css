@@ -168,7 +168,14 @@ a { color: inherit; text-decoration: none; }
 }
 .search input::placeholder { color: #b09c89; }
 .search input::-webkit-search-cancel-button { display: none; }
-.toolbar__filters { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+/* Right-aligned action group: «سبد خرید» then «دسته بندی ها» (categories at the far right) */
+.toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
 
 .fbtn {
   position: relative;
@@ -202,9 +209,8 @@ a { color: inherit; text-decoration: none; }
   box-shadow: 0 0 0 3px #fff;
 }
 
-/* Cart button — sits where the filters button used to (right edge) */
+/* Cart button — first in the right-aligned action group */
 .fbtn--cart {
-  margin-left: auto;
   color: #fff8f0;
   font-weight: 600;
   background: linear-gradient(180deg, #7a5232 0%, #5b3c23 100%);
@@ -1133,9 +1139,10 @@ a { color: inherit; text-decoration: none; }
 
 @media (max-width: 640px) {
   .topbar { padding-top: 14px; }
-  /* search takes its own row; filters (left) and cart (right) share the next */
+  /* search takes its own row; the cart + categories pair stays together on the right */
   .search { order: -1; max-width: none; flex-basis: 100%; }
-  .toolbar__cart, .fbtn--cart { flex: 0 0 auto; }
+  .toolbar__actions { margin-left: auto; gap: 8px; }
+  .fbtn--cart { flex: 0 0 auto; }
   .fbtn { flex: 0 0 auto; justify-content: center; padding: 0 13px; font-size: 12.5px; }
   .fbtn__label { overflow: hidden; text-overflow: ellipsis; }
   .table-footer { justify-content: center; }
