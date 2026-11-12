@@ -1,0 +1,17 @@
+{
+  "name": "coffee-menu-theme",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Coffee Menu — an Eshobe CMS theme: the same item-list screen, rendered from CMS products",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.11"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "dev:mock": "node scripts/dev.mjs",
+    "test": "node --test"
+  }
+}
