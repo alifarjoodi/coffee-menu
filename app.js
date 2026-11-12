@@ -1,25 +1,21 @@
 /* ============================================================
    Coffee Menu — Item List
    Vanilla JS: search · filters · sorting · details drawer
+   The rows are the site's products, read from Eshobe CMS by
+   `/api/menu`; everything else on this screen is unchanged.
    ============================================================ */
 (() => {
   "use strict";
 
-  /* ── Data ─────────────────────────────────────────────── */
-  const ITEMS = Object.freeze([
-    { id: "itm_01", code: "#CFE0F9I93", name: "Choco Choco",      category: "Coffee / Chocolate", rating: 4.9, reviews: 1284, price: 2.50, sellPrice: 3.09, stock: 1000, status: "available", created: "2025-01-14", emoji: "🍫", tint: "#f4e7d4", desc: "Double cocoa espresso with steamed milk and a dusting of dark chocolate curls. Our best seller for cold mornings." },
-    { id: "itm_02", code: "#CFFE8427F1", name: "Biscuit Cream",    category: "Coffee / Cappuccino", rating: 4.2, reviews: 356, price: 1.50, sellPrice: 2.20, stock: 918,  status: "unavailable",     created: "2025-06-04", emoji: "🍪", tint: "#f6ecd8", desc: "Cappuccino folded with biscuit cream and a crunchy caramel crumb topping." },
-    { id: "itm_03", code: "#CFFE3F7SJ2", name: "Sayzen Creme",    category: "Coffee / Cappuccino", rating: 4.7, reviews: 892, price: 2.50, sellPrice: 3.10, stock: 800,  status: "available", created: "2025-02-09", emoji: "☕", tint: "#ede6dc", desc: "Signature house blend with vanilla creme and a soft cinnamon finish." },
-    { id: "itm_04", code: "#CFFE6535B4", name: "Vanilla C Latte", category: "Coffee Latte", rating: 4.8, reviews: 1041,       price: 2.50, sellPrice: 3.05, stock: 772,  status: "available", created: "2025-02-21", emoji: "🥛", tint: "#f3efe4", desc: "Slow-pulled espresso, oat milk and Madagascar vanilla syrup over ice." },
-    { id: "itm_05", code: "#CFFE2D4F71", name: "Banana Chiki",    category: "Coffee / Espresso", rating: 3.6, reviews: 214,  price: 1.50, sellPrice: 2.10, stock: 750,  status: "unavailable",  created: "2025-05-03", emoji: "🍌", tint: "#f8f0cf", desc: "Espresso shot with banana milk and a hint of nutmeg. Temporarily paused for the season." },
-    { id: "itm_06", code: "#CFFE7284J0", name: "Burnt Leci Latte",category: "Coffee Latte", rating: 4.5, reviews: 476,       price: 2.50, sellPrice: 3.10, stock: 640,  status: "available", created: "2025-03-17", emoji: "🌰", tint: "#f0e4d8", desc: "Caramelised lychee syrup, espresso and milk with a burnt-sugar crust aroma." },
-    { id: "itm_07", code: "#CFFE4N9B5",  name: "Java Bali Latte", category: "Coffee Latte", rating: 4.4, reviews: 631,       price: 1.50, sellPrice: 2.40, stock: 500,  status: "unavailable",       created: "2025-04-08", emoji: "🌿", tint: "#e4efe0", desc: "Single-origin Balinese beans with palm sugar and coconut milk." },
-    { id: "itm_08", code: "#CFEY2D047",  name: "Sweet Sally",     category: "Coffee / Espresso", rating: 4.6, reviews: 738,  price: 2.50, sellPrice: 3.05, stock: 999,  status: "unavailable",       created: "2025-06-11", emoji: "🍮", tint: "#f7e8dc", desc: "Vanilla custard espresso, finished with demerara sugar and a pinch of sea salt." },
-    { id: "itm_09", code: "#CFFE90KL3",  name: "Hazelnut Cloud",  category: "Coffee Latte", rating: 4.3, reviews: 289,       price: 2.50, sellPrice: 3.20, stock: 420,  status: "unavailable",     created: "2025-01-28", emoji: "🌰", tint: "#f1e6d6", desc: "Whipped hazelnut foam over a double shot, topped with toasted nut praline." },
-    { id: "itm_10", code: "#CFFE11MQ8",  name: "Mocha Delight",   category: "Coffee / Chocolate", rating: 4.7, reviews: 812, price: 2.50, sellPrice: 3.15, stock: 305,  status: "available", created: "2025-03-02", emoji: "☕", tint: "#ece2d8", desc: "Espresso, cocoa and steamed milk with a soft marshmallow cap." },
-    { id: "itm_11", code: "#CFFE83PX2",  name: "Caramel Breeze",  category: "Coffee Latte", rating: 4.1, reviews: 197,       price: 2.50, sellPrice: 3.10, stock: 180,  status: "available", created: "2025-05-19", emoji: "🍯", tint: "#f7eed8", desc: "Salted caramel latte with a cool almond-milk finish. Runs out fast." },
-    { id: "itm_12", code: "#CFFE56RT7",  name: "Espresso Bloom",  category: "Coffee / Espresso", rating: 3.9, reviews: 143,  price: 2.50, sellPrice: 3.00, stock: 0,    status: "unavailable",  created: "2025-06-30", emoji: "🫘", tint: "#eae4dc", desc: "Bright floral espresso served with sparkling water. Restocking next month." }
-  ].map(item => Object.freeze(item)));
+  /* ── Data (from the CMS) ──────────────────────────────── */
+  /* The item list is the site's products, read from the CMS by this theme's
+     `/api/menu` route; the screen only knows how to draw them. Every price stays
+     an integer minor unit of the site's currency — see `money()` below — and the
+     category labels are the product taxonomy path, exactly like the demo data. */
+  let ITEMS = Object.freeze([]);
+  let CATEGORIES = Object.freeze([{ id: "all", label: "همه", dir: "rtl" }]);
+  let CURRENCY = Object.freeze({ code: "IRT", minorDigits: 0, unit: Object.freeze({ fa: "تومان", en: "Toman" }) });
+  let LOCALE = "fa";
 
   /* ── Status model ─────────────────────────────────────── */
   const STATUS = Object.freeze({
@@ -27,14 +23,16 @@
     unavailable: Object.freeze({ label: "ناموجود", cls: "unavailable", color: "#c26a55" })
   });
 
-  const CATEGORIES = Object.freeze([
-    { id: "all", label: "همه", dir: "rtl" },
-    ...[...new Set(ITEMS.map(item => item.category))].map(cat => ({
-      id: cat,
-      label: cat,
-      dir: "ltr"
-    }))
-  ]);
+  function buildCategories() {
+    return Object.freeze([
+      { id: "all", label: "همه", dir: "rtl" },
+      ...[...new Set(ITEMS.map(item => item.category))].map(cat => ({
+        id: cat,
+        label: cat,
+        dir: "ltr"
+      }))
+    ]);
+  }
 
   const state = {
     q: "",
@@ -45,7 +43,28 @@
 
   /* ── Helpers ──────────────────────────────────────────── */
   const $ = (sel, root = document) => root.querySelector(sel);
-  const money = n => `$${n.toFixed(2)}`;
+
+  /* Money, in the currency the site actually sells in. `formatPrice()` from
+     `@eshobe/site-runtime` does this on the server; the cart multiplies quantities
+     in the browser, so the same rule is mirrored here: minor units in, the site's
+     own unit word out, Persian-Indic digits on `fa`. No Toman/Rial conversion ever
+     happens in this file. */
+  const intlLocale = () => (LOCALE === "fa" ? "fa-IR" : LOCALE || "en");
+  const money = minor => {
+    if (typeof minor !== "number" || !Number.isFinite(minor)) return "";
+    const digits = CURRENCY.minorDigits ?? 0;
+    const amount = new Intl.NumberFormat(intlLocale(), {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits
+    }).format(minor / 10 ** digits);
+    const unit = (CURRENCY.unit && CURRENCY.unit[LOCALE]) || CURRENCY.unit?.en || "";
+    return `${amount} ${unit}`.trim();
+  };
+
+  /* Every other number on the screen — review counts, scores — goes through the
+     locale too, so `fa` shows ۱٬۲۸۴ rather than 1,284. */
+  const num = (value, options) =>
+    new Intl.NumberFormat(intlLocale(), options).format(Number(value) || 0);
 
   const esc = str => String(str).replace(/[&<>"']/g, c =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -86,19 +105,32 @@
   const pctOf = r => Math.max(0, Math.min(100, (r / 5) * 100)).toFixed(0) + "%";
 
   function ratingHTML(item) {
-    const pct = pctOf(item.rating);
+    const rating = Number(item.rating) || 0;
+    const reviews = Number(item.reviews) || 0;
+    const pct = pctOf(rating);
+    const score = num(rating, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
     return `
-      <div class="rating" aria-label="Rated ${item.rating} out of 5 from ${item.reviews} reviews">
-        <span class="rating__score">${item.rating.toFixed(1)}</span>
+      <div class="rating" aria-label="Rated ${score} out of 5 from ${num(reviews)} reviews">
+        <span class="rating__score">${score}</span>
         <span class="stars" style="--pct:${pct}" aria-hidden="true">
           <span class="stars__base">★★★★★</span>
           <span class="stars__fill">★★★★★</span>
         </span>
-        <span class="rating__count">${item.reviews.toLocaleString("en-US")} reviews</span>
+        <span class="rating__count">${num(reviews)} reviews</span>
       </div>`;
   }
 
   /* ── Row rendering ────────────────────────────────────── */
+  /* A product photo when the catalogue has one, the theme's emoji tile otherwise —
+     the row keeps its shape either way. */
+  function thumbHTML(item, className) {
+    const art = item.image
+      ? `<img src="${esc(item.image)}" alt="${esc(item.imageAlt || "")}" loading="lazy" decoding="async" />`
+      : item.emoji;
+    const bg = `background:linear-gradient(160deg,#fff,${item.tint})`;
+    return `<span class="${className}" style="${bg}" aria-hidden="true">${art}</span>`;
+  }
+
   function rowHTML(item) {
     const st = STATUS[item.status];
     return `
@@ -106,7 +138,7 @@
           aria-label="View details for ${esc(item.name)}">
         <td class="col-item">
           <div class="item">
-            <span class="thumb" style="background:linear-gradient(160deg,#fff,${item.tint})" aria-hidden="true">${item.emoji}</span>
+            ${thumbHTML(item, "thumb")}
             <span class="item__text">
               <span class="item__name" title="${esc(item.name)}">${esc(item.name)}</span>
               <span class="item__cat">${esc(item.category)}</span>
@@ -115,7 +147,7 @@
         </td>
         <td class="col-price">
           <div class="price-now">${money(item.price)}</div>
-          <div class="price-old">Sell Price <span>${money(item.sellPrice)}</span></div>
+          ${item.sellPrice ? `<div class="price-old">Sell Price <span>${money(item.sellPrice)}</span></div>` : ""}
         </td>
         <td class="col-status">
           <div class="status-cell">
@@ -607,7 +639,11 @@
 
       <div class="d-top">
         <div class="d-figure">
-          <div class="d-thumb" style="background:linear-gradient(160deg,#fffdf8,${item.tint})" aria-hidden="true">${item.emoji}</div>
+          <div class="d-thumb" style="background:linear-gradient(160deg,#fffdf8,${item.tint})" aria-hidden="true">${
+            item.image
+              ? `<img src="${esc(item.image)}" alt="${esc(item.imageAlt || "")}" decoding="async" />`
+              : item.emoji
+          }</div>
         </div>
 
         <div class="d-summary">
@@ -870,6 +906,28 @@
   });
 
   /* ── Boot ─────────────────────────────────────────────── */
-  render();
-  updateCartBadge();
+  /* First paint comes from the CMS: `/api/menu` is the site's products, already
+     priced, dated and categorised server-side. If the CMS is unreachable the
+     screen still works — the last menu the server had, or an empty list and a
+     toast, never a blank page. */
+  async function loadMenu() {
+    $("#resultCount").textContent = "Loading…";
+    try {
+      const res = await fetch("/api/menu", { headers: { accept: "application/json" } });
+      if (!res.ok) throw new Error(`menu ${res.status}`);
+      const data = await res.json();
+      if (data.currency) CURRENCY = Object.freeze(data.currency);
+      if (data.locale) LOCALE = data.locale;
+      ITEMS = Object.freeze((Array.isArray(data.items) ? data.items : []).map(item => Object.freeze(item)));
+    } catch {
+      toast("منو در دسترس نیست");
+      ITEMS = Object.freeze([]);
+    }
+    CATEGORIES = buildCategories();
+    if (state.category !== "all" && !CATEGORIES.some(c => c.id === state.category)) state.category = "all";
+    render();
+    updateCartBadge();
+  }
+
+  loadMenu();
 })();
